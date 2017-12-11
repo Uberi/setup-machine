@@ -1,0 +1,41 @@
+// Place your settings in this file to overwrite the default settings
+{
+    "editor.minimap.enabled": false,
+    "editor.wordWrap": "on",
+    "editor.autoClosingBrackets": false,
+    "editor.acceptSuggestionOnEnter": "off",
+    "editor.acceptSuggestionOnCommitCharacter": false,
+    "editor.mouseWheelZoom": true,
+    "editor.renderWhitespace": "all",
+    "editor.renderControlCharacters": false,
+    "editor.renderIndentGuides": true,
+    "window.newWindowDimensions": "maximized",
+    "debug.inlineValues": true,
+    "bracketPairColorizer.forceIterationColorCycle": false,
+    "python.linting.enabled": false,
+    "editor.cursorStyle": "block",
+    "editor.cursorBlinking": "blink",
+    "window.zoomLevel": 0,
+
+    "keyboard.dispatch": "keyCode", // make keyboard shortcuts play nice with keyboard layouts where CapsLock and Esc are swapped (like when it's changed in GNOME Tweak)
+
+    // disable all Microsoft telemetry functionality
+    "telemetry.enableTelemetry": false,
+    "telemetry.enableCrashReporter": false,
+
+    // vim-related settings
+    "vim.overrideCopy": false,
+    "vim.easymotion": true,
+    "vim.insertModeKeyBindings": [
+        {"before": ["<home>"], "after": ["<Esc>", "I"]},
+        {"before": ["<end>"], "after": ["<Esc>", "A"]}
+    ],
+    "vim.handleKeys":{
+        "<C-w>": false, "<C-t>": false, "<C-y>": false, "<C-o>": false, "<C-a>": false,
+        "<C-s>": false, "<C-f>": false, "<C-k>": false, "<C-z>": false, "<C-x>": false,
+        "<C-c>": false, "<C-v>": false, "<C-n>": false
+    },
+    "vim.useSystemClipboard": true,
+    "vim.disableAnnoyingNeovimMessage": true,
+    "vim.startInInsertMode": false
+}

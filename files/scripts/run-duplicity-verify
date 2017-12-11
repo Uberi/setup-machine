@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# set up bash to handle errors more aggressively - a "strict mode" of sorts
+set -e # give an error if any command finishes with a non-zero exit code
+set -u # give an error if we reference unset variables
+set -o pipefail # for a pipeline, if any of the commands fail with a non-zero exit code, fail the entire pipeline with that exit code
+
+source ~/SCRIPTS_CONFIG.sh
+
+DESTINATION="s3+http://$DUPLICITY_BACKUP_AWS_S3_BUCKET/$DUPLICITY_BACKUP_AWS_S3_BUCKET_PREFIX"
+
+# export credentials in environment variables for Duplicity to use
+export AWS_ACCESS_KEY_ID="$DUPLICITY_BACKUP_AWS_ACCESS_KEY" # AWS key ID (for an IAM user)
+export AWS_SECRET_ACCESS_KEY="$DUPLICITY_BACKUP_AWS_ACCESS_KEY_SECRET" # AWS secret key (for an IAM user)
+export PASSPHRASE="$DUPLICITY_BACKUP_PASSPHRASE" # local passphrase to encrypt with
+
+# perform backup verification
+duplicity verify --verbosity=info --s3-use-new-style --s3-unencrypted-connection "$DESTINATION" "$DUPLICITY_BACKUP_FOLDER"
+
+echo "BACKUP VERIFICATION COMPLETE"

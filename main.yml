@@ -1,0 +1,429 @@
+- name: setup local development environment
+  remote_user: root
+  hosts: all
+  vars:
+    - tmp_working_dir: "{{ ansible_env.HOME }}/tmp-machine-setup"
+  tasks:
+  - name: create temporary working directory
+    file: path={{ tmp_working_dir }} state=directory
+
+  - name: set up user account with dialout (for serial port access), audio (for realtime JACK audio), and video (for GPU access)
+    user: name={{ user_name }} groups=dialout,audio,video append=yes
+    become: yes
+
+  - name: install common applications
+    apt: name={{ item }}
+    with_items:
+      - audacity                      # simple audio editor
+      - bleachbit                     # computer cleaner
+      - blueman                       # powerful Bluetooth device manager
+      - chromium-browser              # web browser
+      - compizconfig-settings-manager # window manager settings
+      - create-resources              # additional resources for GIMP/Blender/Inkscape
+      - darktable                     # processor for RAW images
+      - dconf-editor                  # settings editor
+      - easytag                       # audio file tag editor
+      - filezilla                     # file transfer client
+      - firefox                       # web browser
+      - fritzing                      # simple circuit designer
+      - gimp                          # image editor
+      - gimp-help-en                  # image editor documentation
+      - git                           # version control system
+      - git-cola                      # version control system GUI
+      - gnome-tweak-tool              # additional settings for GNOME
+      - gparted                       # partition editor
+      - inkscape                      # vector graphics editor
+      - kdenlive                      # video editor
+      - kicad                         # electronics CAD software
+      - kicad-doc-en                  # electronics CAD software documentation
+      - krita                         # painting/visual art software
+      - libreoffice                   # office suite
+      - meld                          # powerful diff utility
+      - meshlab                       # triangular mesh editor and toolkit
+      - mypaint                       # simple painting/visual art software
+      - pavucontrol                   # Pulseaudio application-level volume control
+      - pdfshuffler                   # PDF page-level manipulation software
+      - sonic-visualiser              # audio analysis software
+      - qalculate                     # powerful calculator utility
+      - texstudio                     # TeX editor
+      - texlive-science               # TeX extras for science and math
+      - vim-gtk3                      # text editor
+      - virtualbox                    # virtual machine manager
+      - vlc                           # media player
+      - w3m                           # text-based web browser
+      - wireshark                     # network traffic analyser
+      - xournal                       # document editor/PDF annotator
+      - zeal                          # offline documentation viewer
+    become: yes
+
+  - name: install common command line apps and developer tools
+    apt: name={{ item }}
+    with_items:
+      - pandoc            # universal document converter
+      - tree              # sort of like a recursive `ls`
+      - htop              # resource monitor, sort of like a better `top`
+      - nethogs           # process network usage information
+      - evemu-tools       # X event toolkit
+      - lm-sensors        # computer internal sensor support
+      - tmux              # terminal multiplexer
+      - cryptsetup        # tools for working with encrypted volumes
+      - xclip             # clipboard management from the command line
+      - p7zip-full        # support extracting a wider variety of archives than supported by default
+      - wget              # download files from the internet
+      - gnupg2            # secure communications toolkit
+      - thefuck           # terminal autocorrect
+      - ansible           # configuration and deployment system
+      - vagrant           # development environment VM manager
+      - docker.io         # container runtime
+      - docker-compose    # container management framework
+      - jekyll            # static blog-aware website generator
+      - ruby-jekyll-watch # auto-reload for static blog aware site generator
+      - pcregrep          # grep with PCRE instead of POSIX regular expressions
+      - powertop          # Intel power management utility
+      - whois             # WHOIS directory client
+      - net-tools         # various networking-related tools
+      - gnash             # SWF player
+      - rng-tools         # TRNG interface
+      - traceroute        # network path tracer
+      - checkinstall      # convert software installations into OS packages
+      - jq                # JSON processing with filters
+      - exif              # inspect EXIF data inside photos
+    become: yes
+
+  - name: install Yubikey 4 stuff
+    apt: name={{ item }}
+    with_items:
+      - yubikey-personalization-gui
+      - yubioath-desktop
+      - pcscd
+      - scdaemon
+      - pcsc-tools
+    become: yes
+
+  - name: install various C/C++ development tools and libraries
+    apt: name={{ item }}
+    with_items:
+      - build-essential # many useful build tools
+      - cmake           # compiler-independent build system
+      - automake        # makefile generator
+      - libtool         # library development helper
+      - swig            # language bindings generator
+      - ffmpeg          # media encoders/decoders
+      - ansible         # deployment and configuration maanger
+      - libjpeg-dev     # JPEG libraries
+      - libpng-dev      # PNG libraries
+      - libffi-dev      # foreign function interface libraries
+      - rr              # recording debugger
+    become: yes
+
+  - name: install Scala development tools
+    apt: name={{ item }}
+    with_items:
+      - scala
+      - scala-doc
+    become: yes
+
+  - name: install database tools
+    apt: name={{ item }}
+    with_items:
+      - sqlite3
+      - sqlitebrowser
+      - postgresql-all
+      - postgresql-client
+      - postgresql-doc
+      - pgadmin3
+    become: yes
+
+  - name: install javascript development tools and common libraries
+    apt: name={{ item }}
+    with_items:
+      - nodejs
+      - npm
+    become: yes
+
+  - name: install Lua stuff
+    apt: name={{ item }}
+    with_items:
+      - lua5.3
+      - luarocks
+    become: yes
+
+  - name: install scientific computing tools
+    apt: name={{ item }}
+    with_items:
+      - octave          # MATLAB-like matrix computation software
+      - octave-general  # extra functionality for Octave
+      - octave-htmldoc  # documentation for Octave
+      - octave-signal   # signal processing for Octave
+      - octave-strings  # string manipulation for Octave
+      - octave-struct   # struct manipulation for Octave
+      - octave-symbolic # symbolic computation for Octave
+      - octave-ga       # genetic optimization for Octave
+    become: yes
+
+  - name: install VSCode
+    block:
+      - apt_key: id=BC528686B50D79E339D3721CEB3E94ADBE1229CF url=http://packages.microsoft.com/keys/microsoft.asc
+      - apt_repository: repo='deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main'
+      - apt: name=code update_cache=yes
+    become: yes
+  - name: configure VSCode
+    block:
+      - file: path=~/.config/Code/User state=directory
+      - copy: src=files/settings.json dest=~/.config/Code/User/settings.json
+      - copy: src=files/keybindings.json dest=~/.config/Code/User/keybindings.json
+
+  - name: install FreeCAD
+    block:
+      - apt_key: id=83193AA3B52FF6FCF10A1BBF005EAE8119BB5BCA keyserver=keyserver.ubuntu.com
+      - apt_repository: repo='deb http://ppa.launchpad.net/freecad-maintainers/freecad-stable/ubuntu {{ ansible_distribution_release }} main'
+      - apt: name=freecad update_cache=yes
+      - apt: name=freecad-doc
+    become: yes
+
+  - name: install Blender
+    block:
+      - apt_key: id=D32A3245446233723DECE00F7281E3E842A98114 keyserver=keyserver.ubuntu.com
+      - apt_repository: repo='deb http://ppa.launchpad.net/thomas-schiex/blender/ubuntu {{ ansible_distribution_release }} main'
+      - apt: name=blender update_cache=yes
+    become: yes
+  - name: configure Blender
+    block:
+      - shell: blender --version | grep -o '[0-9]\+\.[0-9]\+'
+        register: blender_version
+        changed_when: no
+      - file: path=~/.config/blender/{{ blender_version.stdout }}/config state=directory
+      - copy: src=files/userpref.blend dest=~/.config/blender/{{ blender_version.stdout }}/config/userpref.blend
+
+  - name: install Python development tools and common libraries that are available as packages
+    apt: name={{ item }}
+    with_items:
+      - python-all-dev
+      - python3-all-dev
+      - python-pip
+      - python3-pip
+      - python-wheel
+      - python3-wheel
+      - python3-pyside
+      - python3-numpy
+      - python3-sympy
+      - python3-sklearn
+      - python3-matplotlib
+      - python3-cryptography
+      - python3-serial
+      - python3-requests
+      - python3-requests-cache
+      - python3-requests-futures
+      - python3-colorama
+      - python3-sortedcontainers
+      - python3-urwid
+      - python3-xdo
+      - python3-flask
+      - python3-flask-sqlalchemy
+      - python3-pygit2
+      - python3-pudb
+      - flake8
+      - python3-flake8
+      - python3-mutagen
+      - python3-arrow
+      - python3-scipy
+      - python3-plotly
+      - python3-seaborn
+      - python3-bs4
+      - python3-pexpect
+      - python3-pyperclip
+      - python3-venv
+      - python3-q
+      - virtualenvwrapper
+      - twine
+      - mypy
+    become: yes
+
+  - name: install ZSH make it the default shell
+    block:
+      - apt: name={{ item }}
+        with_items:
+          - zsh
+          - zsh-syntax-highlighting
+          - zsh-doc
+          - zsh-lovers
+          - zgen
+          - socat
+          - python3-psutil
+          - python3-pygit2
+          - powerline
+      - user: name={{ user_name }} shell=/usr/bin/zsh
+    become: yes
+  - name: configure ZSH
+    copy: src=files/.zshrc dest=~/.zshrc
+
+  - name: install software for backing up files to S3
+    apt: name={{ item }}
+    with_items:
+      - python-boto
+      - duplicity
+    become: yes
+
+  - name: configure Vim
+    copy: src=files/.vimrc dest=~/.vimrc
+
+  - name: install various system administration scripts
+    block:
+      - file: path=~/.local/bin state=directory
+      - copy: src=files/scripts/ dest=~/.local/bin/ mode=u+x
+
+  - name: install basic audio/music packages
+    apt: name={{ item }}
+    with_items:
+      - qjackctl     # JACK audio control/configuration panel
+      - vmpk         # virtual MIDI keyboard
+      - lmms         # simple sequencer/DAW
+      - jalv         # plugin host for LV2 audio plugins
+      - calf-plugins # collection of useful LV2 audio plugins
+      - so-synth-lv2 # LV2 synthesizer plugins
+      - caps         # C* audio plugin suite
+      - zynaddsubfx  # subtractive synthesizer
+      - ams          # modular synthesizer
+      - qmidiroute   # MIDI re-routing utility
+      - qmidiarp     # MIDI arpeggiator
+      - hydrogen     # drum machine/sequencer
+      - ardour       # fully-featured DAW
+    become: yes
+
+  # UPGRADEABLE: LAST UPDATE 2017-12-07
+  - name: install Arduino IDE
+    block:
+      - get_url:
+          checksum: sha512:314fd3013794d4868990f79564a2c71885621e5479118ca05f47663702578f8f080fb5c099acae25c56ec07a067f0583c49ddc99055b33657cbf8c5aa2e103b5
+          dest: "{{ tmp_working_dir }}/arduino-linux.tar.xz"
+          url: https://downloads.arduino.cc/arduino-1.8.5-linux64.tar.xz
+        register: arduino_ide
+      - unarchive: dest=/opt/ src={{ tmp_working_dir }}/arduino-linux.tar.xz
+        when: arduino_ide.changed
+      - shell: /opt/arduino-*/install.sh
+        when: arduino_ide.changed
+    become: yes
+
+  - name: configure Gnome dock using DConf
+    dconf: key={{ item.key }} value={{ item.value }} state=present
+    with_items:
+      - { key: "/org/gnome/shell/favorite-apps", value: "['firefox.desktop', 'rhythmbox.desktop', 'org.gnome.Nautilus.desktop', 'gnome-control-center.desktop', 'zeal.desktop', 'code.desktop']" }
+      - { key: "/org/gnome/shell/extensions/dash-to-dock/dock-fixed", value: "false" }
+      - { key: "/org/gnome/shell/extensions/dash-to-dock/dock-position", value: "'BOTTOM'" }
+      - { key: "/org/gnome/shell/extensions/dash-to-dock/dash-max-icon-size", value: "16" }
+
+  - name: install Nautilus plus extensions
+    apt: name={{ item }}
+    with_items:
+      - nautilus
+      - nautilus-wipe
+      - nautilus-admin
+    become: yes
+
+  - name: configure Nautilus with settings and keyboard shortcuts
+    block:
+      - copy: src=files/Terminal dest=~/.local/share/nautilus/scripts/Terminal mode=u+x # set up Nautilus script that opens a terminal window at the currently open directory
+      - copy: content="F12 Terminal" dest=~/.config/nautilus/scripts-accels # set the script to run when we press F12
+      - dconf: key={{ item.key }} value={{ item.value }} state=present
+        with_items:
+          - { key: "/org/gnome/nautilus/list-view/default-visible-columns", value: "['name', 'size', 'type', 'owner', 'group', 'permissions', 'mime_type', 'date_modified_with_time']" }
+          - { key: "/org/gnome/nautilus/preferences/search-view", value: "'list-view'" }
+          - { key: "/org/gnome/nautilus/preferences/default-folder-viewer", value: "'list-view'" }
+          - { key: "/org/gnome/nautilus/preferences/fts-default", value: "false" }
+          - { key: "/org/gnome/nautilus/preferences/show-create-link", value: "true" }
+          - { key: "/org/gnome/nautilus/preferences/show-delete-permanently", value: "true" }
+      - copy: content="" dest=~/Templates/empty-text-file.txt # create empty test file without having to switch to a terminal
+
+  - name: install some useful Gnome shell extensions
+    apt: name={{ item }}
+    with_items:
+      - chrome-gnome-shell
+      - gnome-shell-extensions
+      - gnome-shell-extension-system-monitor
+      - gnome-shell-extension-pixelsaver
+    become: yes
+  - name: configure Gnome shell extensions
+    dconf: key={{ item.key }} value={{ item.value }} state=present
+    with_items:
+      - { key: "/org/gnome/shell/enabled-extensions", value: "['alternate-tab@gnome-shell-extensions.gcampax.github.com', 'system-monitor@paradoxxx.zero.gmail.com', 'pixel-saver@deadalnix.me']" }
+      - { key: "/org/gnome/shell/extensions/system-monitor/show-tooltip", value: "true" }
+      - { key: "/org/gnome/shell/extensions/system-monitor/disk-display", value: "true" }
+      - { key: "/org/gnome/shell/extensions/system-monitor/net-display", value: "false" }
+      - { key: "/org/gnome/shell/extensions/system-monitor/cpu-refresh-time", value: "1000" }
+      - { key: "/org/gnome/shell/extensions/system-monitor/memory-refresh-time", value: "1000" }
+      - { key: "/org/gnome/shell/extensions/system-monitor/disk-refresh-time", value: "1000" }
+
+  - name: install Numix theme for GTK
+    apt: name=numix-gtk-theme
+    become: yes
+
+  - name: configure Gnome using DConf
+    dconf: key={{ item.key }} value={{ item.value }} state=present
+    with_items:
+      - { key: "/org/gnome/desktop/interface/clock-show-date", value: "true" } # show date in top bar clock
+      - { key: "/org/gnome/desktop/interface/clock-show-seconds", value: "true" } # show seconds in top bar clock
+      - { key: "/org/gnome/desktop/interface/show-battery-percentage", value: "true" } # show battery percentage in top bar
+      - { key: "/org/gnome/desktop/calendar/show-weekdate", value: "true" } # show week of year in top bar calendar
+
+      - { key: "/org/gnome/desktop/interface/gtk-theme", value: "'Numix'" } # use Numix GTK+ theme
+      - { key: "/com/ubuntu/sound/allow-amplified-volume", value: "true" } # allow volume to be set above 100% in top bar
+      - { key: "/org/gnome/desktop/input-sources/xkb-options", value: "['caps:swapescape']" } # swap CapsLock and Escape keys
+      - { key: "/org/gnome/desktop/notifications/show-in-lock-screen", value: "false" } # don't show notifications on lock screen
+      - { key: "/org/gnome/desktop/interface/gtk-enable-primary-paste", value: "false" } # disable middle-click paste
+      - { key: "/org/gnome/desktop/privacy/remember-recent-files", value: "false" } # disable files tracker (massive resource hog)
+
+      - { key: "/org/gnome/rhythmbox/sources/visible-columns", value: "['post-time', 'artist', 'duration', 'album', 'track-number', 'date', 'first-seen']" }
+
+  - name: configure keyboard shortcuts using DConf
+    dconf: key={{ item.key }} value={{ item.value }} state=present
+    with_items:
+      - { key: "/org/gnome/desktop/wm/keybindings/switch-to-workspace-up",    value: "['<Primary><Super>Up']" }
+      - { key: "/org/gnome/desktop/wm/keybindings/switch-to-workspace-down",  value: "['<Primary><Super>Down']" }
+      - { key: "/org/gnome/desktop/wm/keybindings/switch-to-workspace-left",  value: "['<Primary><Super>Left']" }
+      - { key: "/org/gnome/desktop/wm/keybindings/switch-to-workspace-right", value: "['<Primary><Super>Right']" }
+      - { key: "/org/gnome/desktop/wm/keybindings/move-to-workspace-up",      value: "['<Shift><Super>Up']" }
+      - { key: "/org/gnome/desktop/wm/keybindings/move-to-workspace-down",    value: "['<Shift><Super>Down']" }
+      - { key: "/org/gnome/desktop/wm/keybindings/move-to-workspace-left",    value: "['<Shift><Super>Left']" }
+      - { key: "/org/gnome/desktop/wm/keybindings/move-to-workspace-right",   value: "['<Shift><Super>Right']" }
+      - { key: "/org/gnome/desktop/wm/keybindings/move-to-monitor-up",        value: "['<Shift><Super>w']" }
+      - { key: "/org/gnome/desktop/wm/keybindings/move-to-monitor-down",      value: "['<Shift><Super>s']" }
+      - { key: "/org/gnome/desktop/wm/keybindings/move-to-monitor-left",      value: "['<Shift><Super>a']" }
+      - { key: "/org/gnome/desktop/wm/keybindings/move-to-monitor-right",     value: "['<Shift><Super>d']" }
+      - { key: "/org/gnome/desktop/wm/keybindings/toggle-fullscreen",         value: "['<Super>F11']" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/name",    value: "'Rhythmbox Play/Pause'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/command", value: "'rhythmbox-client --play-pause'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/binding", value: "'<Super>F5'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/name",    value: "'Rhythmbox Stop'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/command", value: "'rhythmbox-client --stop'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/binding", value: "'<Super>F6'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/name",    value: "'Rhythmbox Previous'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/command", value: "'rhythmbox-client --previous'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/binding", value: "'<Super>F7'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/name",    value: "'Rhythmbox Next'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/command", value: "'rhythmbox-client --next'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/binding", value: "'<Super>F8'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/name",    value: "'Launch Qalculate'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/command", value: "'qalculate'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/binding", value: "'<Super>c'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5/name",    value: "'Open Dropbox Folder'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5/command", value: "'nautilus Dropbox'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5/binding", value: "'<Super>f'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom6/name",    value: "'Open VSCode'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom6/command", value: "'code'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom6/binding", value: "'<Super>e'" }
+      - { key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings", value: "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom6/']" }
+
+  - name: configure Git
+    git_config: name={{ item.name }} scope=global value={{ item.value }}
+    with_items:
+      - { name: "rerere.enabled", value: "true" }     # enable reuse of recorded hunk conflict resolutions
+      - { name: "push.default", value: "matching" }   # use matching behaviour in pushes
+      - { name: "user.name", value: "{{ real_name }}" } # user's real name
+      - { name: "user.email", value: "{{ email }}" }    # user's real name
+
+  - name: disable Avahi as it is unnecessary attack surface
+    service: name=avahi-daemon enabled=no state=stopped
+    become: yes
+  - name: disable CUPS Bonjour browser as it is unnecessary attack surface
+    service: name=cups-browsed enabled=no state=stopped
+    become: yes

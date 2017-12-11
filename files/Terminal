@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+gnome-terminal "$NAUTILUS_SCRIPT_CURRENT_URI"
