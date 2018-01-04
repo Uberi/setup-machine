@@ -7,9 +7,15 @@
   - name: create temporary working directory
     file: path={{ tmp_working_dir }} state=directory
 
-  - name: set up user account with dialout (for serial port access), audio (for realtime JACK audio), and video (for GPU access)
-    user: name={{ user_name }} groups=dialout,audio,video append=yes
+  - name: set up user account with dialout (for serial port access), audio (for realtime JACK audio), video (for GPU access), and vboxusers (for USB access in Virtualbox)
+    user: name={{ user_name }} groups=dialout,audio,video,vboxusers append=yes
     become: yes
+
+  - name: uninstall redundant and broken applications
+    apt: name={{ item }} state=absent
+    with_items:
+      - totem # video player, brings down entire GNOME environment when it crashes for some reason
+      - eog   # image viewer, crashes a lot and doesn't handle large images very well
 
   - name: install common applications
     apt: name={{ item }}
