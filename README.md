@@ -33,7 +33,13 @@ Manual steps required afterward:
 * Download unit definitions and exchange rates for Qalculate (Qalculate will prompt to do this on first run).
 * Download docsets for Zeal.
 * Install Rust toolchain via [rustup](https://www.rustup.rs/). Not automatically installed due to unsigned packages.
-* Install useful VSCode extensions from verified VSIX files: `ms-python.python`, `ms-vscode.cpptools`, `vscodevim.vim`, `CoenraadS.bracket-pair-colorizer`, `alefragnani.bookmarks`.
+* Install useful VSCode extensions from verified VSIX files:
+    * `ms-python.python`.
+    * `PeterJausovec.vscode-docker`.
+    * `ms-vscode.cpptools`.
+    * `vscodevim.vim`.
+    * `CoenraadS.bracket-pair-colorizer`.
+    * `alefragnani.bookmarks`.
 * Set up custom LibreOffice templates.
 * Restore bookmarks and user settings in Firefox. Install useful Firefox extensions: [uBlock Origin](https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/), [Privacy Badger](https://addons.mozilla.org/en-US/firefox/addon/privacy-badger17/).
 * Set up calendar reminder to run `run-duplicity-backup` (a custom shell script installed by this project) regularly.

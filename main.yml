@@ -32,6 +32,7 @@
       - filezilla                     # file transfer client
       - firefox                       # web browser
       - fritzing                      # simple circuit designer
+      - fritzing-parts                # parts configuration for simple circuit designer
       - gimp                          # image editor
       - gimp-help-en                  # image editor documentation
       - git                           # version control system
@@ -210,6 +211,8 @@
       - python3-pip
       - python-wheel
       - python3-wheel
+      - python-rope
+      - python3-rope
       - python3-pyside
       - python3-numpy
       - python3-sympy

@@ -79,3 +79,7 @@ alias 'gpg-list=gpg --fingerprint --fingerprint --list-keys' # `gpg-list`, or gp
 alias 'gpg-send=gpg --keyserver keyserver.ubuntu.com --send-keys' # gpg-send KEY_IDENTIFIER
 alias 'gpg-show=gpg --fingerprint --fingerprint' # gpg-show KEY_IDENTIFIER
 alias 'gpg-delete=gpg --delete-keys' # gpg-delete KEY_IDENTIFIER
+
+# user-specific aliases
+alias 'run-hdd-backup=rsync --archive --verbose --human-readable --progress --update --delete "/home/az/Dropbox" "/media/az/Backup"'
+alias 'run-usb-backup=rsync --archive --verbose --human-readable --progress --update --delete "/home/az/Dropbox" "/media/az/BackupUSB"'
