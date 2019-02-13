@@ -40,9 +40,14 @@ Manual steps required afterward:
     * `vscodevim.vim`.
     * `CoenraadS.bracket-pair-colorizer`.
     * `alefragnani.bookmarks`.
+    * `MS-vsliveshare.vsliveshare`.
+    * `dbaeumer.vscode-eslint`
 * Set up custom LibreOffice templates.
-* Restore bookmarks and user settings in Firefox. Install useful Firefox extensions: [uBlock Origin](https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/), [Privacy Badger](https://addons.mozilla.org/en-US/firefox/addon/privacy-badger17/).
-* Set up calendar reminder to run `run-duplicity-backup` (a custom shell script installed by this project) regularly.
+* Restore bookmarks and user settings in Firefox. Install useful Firefox extensions: [uBlock Origin](https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/), [Privacy Badger](https://addons.mozilla.org/en-US/firefox/addon/privacy-badger17/). Configure Firefox options:
+    * `network.IDN_show_punycode` should be true (to avoid IDN homoglyph phishing).
+    * `security.webauth.u2f` should be true (to enable Yubikey login).
+    * `webgl.disabled` should be true (to avoid WebGL attack surface).
+* Set up calendar reminder to run `run-restic-backup` (a custom shell script installed by this project) regularly.
 * Install or configure crucial proprietary software (CAD and DSP).
 * Hardware tweaks:
     * Color-calibrate display (use the onboard Pantone calibrator).

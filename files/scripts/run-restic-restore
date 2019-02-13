@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# set up bash to handle errors more aggressively - a "strict mode" of sorts
+set -e # give an error if any command finishes with a non-zero exit code
+set -u # give an error if we reference unset variables
+set -o pipefail # for a pipeline, if any of the commands fail with a non-zero exit code, fail the entire pipeline with that exit code
+
+source ~/SCRIPTS_CONFIG.sh
+
+# export credentials in environment variables for Restic to use
+export B2_ACCOUNT_ID="$RESTIC_B2_APPLICATION_KEY_ID"
+export B2_ACCOUNT_KEY="$RESTIC_B2_APPLICATION_KEY"
+export RESTIC_REPOSITORY="b2:$RESTIC_B2_BUCKET"
+export RESTIC_PASSWORD="$RESTIC_ENCRYPTION_PASSWORD"
+
+# restore latest backup to local backup folder
+restic -r "$RESTIC_REPOSITORY" restore latest --target "$RESTIC_BACKUP_FOLDER"
+
+echo "BACKUP RESTORATION COMPLETE"

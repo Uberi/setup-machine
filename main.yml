@@ -1,3 +1,4 @@
+#wip: update for Ubuntu 18.04 Bionic
 - name: setup local development environment
   remote_user: root
   hosts: all
@@ -23,6 +24,7 @@
       - audacity                      # simple audio editor
       - bleachbit                     # computer cleaner
       - blueman                       # powerful Bluetooth device manager
+      - calibre                       # ebook editor, viewer, converter, manager
       - chromium-browser              # web browser
       - compizconfig-settings-manager # window manager settings
       - create-resources              # additional resources for GIMP/Blender/Inkscape
@@ -54,6 +56,9 @@
       - qalculate                     # powerful calculator utility
       - texstudio                     # TeX editor
       - texlive-science               # TeX extras for science and math
+      - texlive-science-doc           # documentation for TeX extras for science and math
+      - texlive-latex-extra           # TeX additional packages
+      - texlive-latex-extra-doc       # documentation for TeX additional packages
       - vim-gtk3                      # text editor
       - virtualbox                    # virtual machine manager
       - vlc                           # media player
@@ -95,6 +100,7 @@
       - checkinstall      # convert software installations into OS packages
       - jq                # JSON processing with filters
       - exif              # inspect EXIF data inside photos
+      - restic            # incremental encrypted backups
     become: yes
 
   - name: install Yubikey 4 stuff
@@ -180,6 +186,16 @@
       - copy: src=files/settings.json dest=~/.config/Code/User/settings.json
       - copy: src=files/keybindings.json dest=~/.config/Code/User/keybindings.json
 
+  - name: install Signal for Desktop
+    block:
+      - apt_key: id=DBA36B5181D0C816F630E889D980A17457F6FB06 keyserver=keyserver.ubuntu.com
+      - apt_key:
+          url: https://updates.signal.org/desktop/apt/keys.asc
+          id: DBA36B5181D0C816F630E889D980A17457F6FB06
+      - apt_repository: repo='deb [arch=amd64] https://updates.signal.org/desktop/apt xenial main' # Signal team only maintains xenial packages, however this is designed to work for all Debian-derivatives
+      - apt: name=signal-desktop update_cache=yes
+    become: yes
+
   - name: install FreeCAD
     block:
       - apt_key: id=83193AA3B52FF6FCF10A1BBF005EAE8119BB5BCA keyserver=keyserver.ubuntu.com
@@ -248,7 +264,7 @@
       - mypy
     become: yes
 
-  - name: install ZSH make it the default shell
+  - name: install ZSH and make it the default shell
     block:
       - apt: name={{ item }}
         with_items:
@@ -265,13 +281,6 @@
     become: yes
   - name: configure ZSH
     copy: src=files/.zshrc dest=~/.zshrc
-
-  - name: install software for backing up files to S3
-    apt: name={{ item }}
-    with_items:
-      - python-boto
-      - duplicity
-    become: yes
 
   - name: configure Vim
     copy: src=files/.vimrc dest=~/.vimrc
