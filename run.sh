@@ -7,9 +7,11 @@ set -o pipefail # for a pipeline, if any of the commands fail with a non-zero ex
 
 SCRIPT_DIR=$(dirname $(readlink -f "$0")) # get the directory containing the bash script
 
+sudo apt-get install ansible
+
 # do software setup with Ansible
 ansible-playbook \
-    -i "$SCRIPT_DIR/inventory/localhost.ini" \
+    -i "$SCRIPT_DIR/inventory/local.ini" \
     --ask-become-pass \
     --extra-vars "user_name=az real_name='Anthony Zhang' email=me@anthonyz.ca" \
     "$SCRIPT_DIR/main.yml"

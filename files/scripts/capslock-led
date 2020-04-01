@@ -1,0 +1,34 @@
+#!/usr/bin/bash
+
+# SETUP PROCEDURE:
+# 1. Copy to `/usr/bin/capslock-led` so it's in a convenient location.
+# 2. Make the script executable and owned by root `sudo chown root:root /usr/bin/capslock-led`.
+# 3. Run `sudo visudo` to edit the sudoers file, then add the following line: `YOUR_USERNAME_HERE ALL=(root) NOPASSWD: /usr/bin/capslock-led` to allow this script to be run using sudo without having to enter your root password.
+
+# Also, the path of the Capslock LED is specific to a Dell XPS13 9380 - you may need to change it to the right path if it's not under `/sys/class/leds/input3`. You can find all LEDs using `ls /sys/class/leds`.
+
+if [ "$EUID" -ne 0 ]; then
+    echo "This script must be run as root."
+    echo "Usage: $0 BINARY_PATTERN DELAY_SECONDS"
+    exit 1
+fi
+
+BINARY_PATTERN=$1
+DELAY_SECONDS=$2
+
+if ! [[ "$BINARY_PATTERN" =~ ^[01]+$ ]]; then
+    echo 'Invalid BINARY_PATTERN value.'
+    echo "Usage: $0 BINARY_PATTERN DELAY_SECONDS"
+    exit 1
+fi
+
+if ! [[ "$DELAY_SECONDS" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+    echo 'Invalid DELAY_SECONDS value.'
+    echo "Usage: $0 BINARY_PATTERN DELAY_SECONDS"
+    exit 1
+fi
+
+while read LED_STATUS; do
+    echo "$LED_STATUS" > /sys/class/leds/input3::capslock/brightness
+    sleep $DELAY_SECONDS
+done < <(fold -w1 <<<"$BINARY_PATTERN")

@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+# based on https://superuser.com/questions/760602/how-to-remap-keys-under-linux-for-a-specific-keyboard-only and https://askubuntu.com/questions/395/how-do-i-reset-my-keyboard-layout
+
+WORKMAN_XKB_CONFIG_PATH='/usr/share/X11/xkb/symbols/workman'
+
+if [ -e "$WORKMAN_XKB_CONFIG_PATH" ]; then
+    echo "WORKMAN XKB CONFIG FOUND AT $WORKMAN_XKB_CONFIG_PATH"
+else
+    echo "WORKMAN XKB CONFIG NOT FOUND; NEED ROOT PERMISSIONS TO INSTALL CONFIG FILE AT $WORKMAN_XKB_CONFIG_PATH"
+    sudo tee "$WORKMAN_XKB_CONFIG_PATH" << 'EOF'
+// from https://github.com/workman-layout/Workman/blob/master/xorg/workman without the changes to CapsLock behaviour (since GNOME is already configured to swap Capslock and Escape)
+
+// Workman Keyboard Layout symbols for xkb on X.Org Server 7.x
+// 09-06-2010 OJ Bucao. http://www.workmanlayout.com
+
+partial alphanumeric_keys
+xkb_symbols "workman" {
+
+    name[Group1]= "English (Workman)";
+
+    include "us(basic)"
+
+    // Alphanumeric section
+    key <AD01> {  [   q,  Q   ] };
+    key <AD02> {  [   d,  D   ] };
+    key <AD03> {  [   r,  R   ] };
+    key <AD04> {  [   w,  W   ] };
+    key <AD05> {  [   b,  B   ] };
+    key <AD06> {  [   j,  J   ] };
+    key <AD07> {  [   f,  F   ] };
+    key <AD08> {  [   u,  U   ] };
+    key <AD09> {  [   p,  P   ] };
+    key <AD10> {  [   semicolon,  colon   ] };
+
+    key <AC01> {  [   a,  A   ] };
+    key <AC02> {  [   s,  S   ] };
+    key <AC03> {  [   h,  H   ] };
+    key <AC04> {  [   t,  T   ] };
+    key <AC05> {  [   g,  G   ] };
+    key <AC06> {  [   y,  Y   ] };
+    key <AC07> {  [   n,  N   ] };
+    key <AC08> {  [   e,  E   ] };
+    key <AC09> {  [   o,  O   ] };
+    key <AC10> {  [   i,  I   ] };
+
+    key <AB01> {  [   z,  Z   ] };
+    key <AB02> {  [   x,  X   ] };
+    key <AB03> {  [   m,  M   ] };
+    key <AB04> {  [   c,  C   ] };
+    key <AB05> {  [   v,  V   ] };
+    key <AB06> {  [   k,  K   ] };
+    key <AB07> {  [   l,  L   ] };
+    // End alphanumeric section
+
+    include "level3(ralt_switch)"
+};
+EOF
+fi
+
+# remap just the laptop's builtin keyboard to Workman
+DEVICE_NAME='AT Translated Set 2 keyboard'
+DEVICE_ID=$(xinput list | sed -n "s/.*${DEVICE_NAME}.*id=\([0-9]*\).*/\1/p")
+
+if setxkbmap -device 11 -print | grep -q "workman"; then
+    echo "WORKMAN LAYOUT DETECTED; RESETTING LAYOUT FOR KEYBOARD NUMBER $DEVICE_ID TO STANDARD US"
+    setxkbmap us
+else
+    echo "NON-WORKMAN LAYOUT DETECTED; SETTING LAYOUT FOR KEYBOARD NUMBER $DEVICE_ID TO WORKMAN"
+    setxkbmap us -variant workman -device $DEVICE_ID
+fi

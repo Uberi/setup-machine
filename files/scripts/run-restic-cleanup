@@ -13,13 +13,7 @@ export B2_ACCOUNT_KEY="$RESTIC_B2_APPLICATION_KEY"
 export RESTIC_REPOSITORY="b2:$RESTIC_B2_BUCKET"
 export RESTIC_PASSWORD="$RESTIC_ENCRYPTION_PASSWORD"
 
-# figure out how many snapshots are redundant (a snapshot is redundant if it's more than a year old, and isn't within the last 10 backups)
-#restic -r "$RESTIC_REPOSITORY" forget --dry-run --keep-last 10 --keep-within 1y
+# retain only snapshots that are either within the last 5 most recent snapshots (inclusive), made within a year before the most recent snapshot, or the last one of the year within the last 10 years - all other snapshots are removed
+restic -r "$RESTIC_REPOSITORY" forget --keep-last 5 --keep-within 1y --keep-yearly 10 --prune
 
-# initialize the repository if it doesn't already exist (if it does exist, then fail)
-restic -r "$RESTIC_REPOSITORY" init || true
-
-# perform backup
-restic -r "$RESTIC_REPOSITORY" backup --verbose=2 "$RESTIC_BACKUP_FOLDER"
-
-echo "BACKUP COMPLETE - RUN run-restic-verify TO VERIFY THIS BACKUP"
+echo "BACKUP VERIFICATION COMPLETE"
