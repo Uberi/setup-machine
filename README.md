@@ -19,11 +19,12 @@ Partially inspired by [Stavros Korokithakis' configuration playbook](https://www
 Manual steps required beforehand:
 
 * Disable Intel ME with [me_cleaner](https://github.com/corna/me_cleaner). Make sure to take a firmware backup beforehand.
-* Install 64-bit Ubuntu 19.04. Check out [official docs](https://tutorials.ubuntu.com/tutorial/tutorial-how-to-verify-ubuntu) for verifying the digital signatures.
+* Install 64-bit Xubuntu 20.04. Check out [official docs](https://tutorials.ubuntu.com/tutorial/tutorial-how-to-verify-ubuntu) for verifying the digital signatures.
 * Add BIOS password and disable booting from external devices.
 * Install a case and privacy screen - here are links for the Dell XPS 9380 Developer Edition:
     * [3M Gold Privacy Screen, 13.3"](https://www.amazon.ca/gp/product/B003V0ZSOE/)
     * [mCover Hard Shell Case for Dell XPS 9370/9380](https://www.amazon.ca/iPearl-mCover-models-fitting-Ultrabook/dp/B079TZWQKK/)
+* Back up LUKS headers for encrypted volumes: `sudo cryptsetup luksHeaderBackup /dev/nvme0n1p3 --header-backup-file 'XPS 13 LUKS Header Backup.img'` (then back up the generated img file to other, accessible places).
 * Copy in personal files from backups to `~/Files`.
 
 Automatic steps:
@@ -33,30 +34,25 @@ Automatic steps:
 Manual steps required afterward:
 
 * Install fonts by copying them to the user fonts directory with `mkdir -p ~/.fonts; find ~/Files/Fonts -type f -exec cp -t ~/.fonts -i '{}' +; fc-cache -f -v`.
+* Install "Inconsolata-g for Powerline" font and set the terminal font to this one, in order to get Powerline rendering correctly.
 * Import SSH and GPG public keys.
 * Set up Yubikey 4 with GPG keys and touch-to-sign from offline machine.
 * Download docsets for Zeal.
 * Install packages that need out-of-band verification:
     * Rust toolchain via [rustup](https://www.rustup.rs/).
-    * JS package management via [Yarn](https://yarnpkg.com/en/).
-    * Node.js version management with [NVM](https://github.com/creationix/nvm#installation-and-update).
     * Google Cloud management via [Google Cloud SDK](https://cloud.google.com/sdk/docs/downloads-apt-get).
     * AWS management via [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html).
 * Install useful VSCode extensions from verified VSIX files:
-    * `ms-python.python`.
-    * `ms-azuretools.vscode-docker`.
-    * `ms-vscode.cpptools`.
+    * `ms-python.python`. Microsoft official.
+    * `ms-azuretools.vscode-docker`. Microsoft official.
+    * `ms-vscode.cpptools`. Microsoft official.
+    * `ms-vscode.vscode-typescript-tslint-plugin`. Microsoft official.
+    * `vsciot-vscode.vscode-arduino`. Microsoft official.
     * `vscodevim.vim`.
     * `coenraads.bracket-pair-colorizer-2`.
     * `alefragnani.bookmarks`.
-    * `ms-vsliveshare.vsliveshare-pack`.
-    * `dbaeumer.vscode-eslint`.
-    * `jpoissonnier.vscode-styled-components`.
-    * `ms-vscode.vscode-typescript-tslint-plugin`.
     * `adamwalzer.string-converter`.
     * `oliversturm.fix-json`.
-    * `vsciot-vscode.vscode-arduino`.
-* Set up custom LibreOffice templates.
 * Restore bookmarks and user settings in Firefox.
 * Install useful Firefox extensions:
     * [uBlock Origin](https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/).
@@ -64,35 +60,32 @@ Manual steps required afterward:
     * [Auto Tab Discard](https://addons.mozilla.org/en-US/firefox/addon/auto-tab-discard/).
 * Configure Firefox options:
     * `network.IDN_show_punycode` should be true (to avoid IDN homoglyph phishing).
-    * `security.webauth.u2f` should be true (to enable Yubikey login).
     * `webgl.disabled` should be true (to avoid WebGL attack surface).
     * `ui.key.menuAccessKeyFocuses` should be false (to make lone Alt keypresses a no-op, since Diverge 3 keyboard uses a dual-role Enter/Alt key).
     * `browser.sessionstore.warnOnQuit` should be true (to prevent errant Ctrl + Q keypresses from closing the browser).
     * `app.normandy.enabled` should be false (to disable targeted studies and preference rollouts).
     * `dom.serviceWorkers.enabled` should be false (to disable service workers, which often cause caching issues with shitty sites).
 * Set up calendar reminder to run `run-restic-backup` (a custom shell script installed by this project) regularly.
-* Install or configure crucial proprietary software:
-    * CAD and DSP packages.
-* Update Rhythmbox "Date Added" to match the "Last Modified" time on music files: `perl -0777 -p -i -e 's/<mtime>([0-9]+)<\/mtime>([^<]*)<first-seen>[0-9]+<\/first-seen>/<mtime>\1<\/mtime>\2<first-seen>\1<\/first-seen>/g' ~/.local/share/rhythmbox/rhythmdb.xml`.
+* Customise XFCE:
+    * In Thunar's `Edit` -> `Configure custom actions` dialog, set the `Open Terminal Here` shortcut to have keyboard shortcut F12.
+    * Set up mouse/touchpad options for the current hardware.
 * Set up copy of Hypotenuse Labs' Google Drive folder with `rclone config`. The config file, `~/.config/rclone/rclone.conf`, should look like this afterwards:
 
         [hyplabs]
         type = drive
+        client_id = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com
+        client_secret = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         scope = drive.readonly
         root_folder_id = 12qUgt4vgb6mG7X8wwBjH_EWZ7If4t7P7
-        token = XXXXXXXXXXXXXXXXXXX
+        token = {"access_token":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX","token_type":"Bearer","refresh_token":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX","expiry":"2020-07-10T05:53:07.468190874-00:00"}
+        team_drive = 
 
-* Set up and install GNOME extensions:
-    * [Unite](https://extensions.gnome.org/extension/1287/unite/) for removing title bars on maximized windows and moving window controls into the top bar.
-    * [Disconnect Wifi](https://extensions.gnome.org/extension/904/disconnect-wifi/) to conveniently disconnect from the current wifi network.
-    * [Dash to Panel](https://extensions.gnome.org/extension/1160/dash-to-panel/) to move the dash at the bottom into the top bar.
-    * [gTile](https://extensions.gnome.org/extension/28/gtile/) for tiling window management.
-    * [system-monitor](https://extensions.gnome.org/extension/120/system-monitor/) for resource monitoring.
-    * [windowNavigator](https://extensions.gnome.org/extension/10/windownavigator/) for keyboard navigation in overlay mode.
 * Set up Geary for email:
     * Add account with GMail over IMAP, must use an [App Password](https://support.google.com/accounts/answer/185833) (don't use GNOME Online Accounts, it requests too many permissions). Make sure it's configured to download "Everything" from IMAP, rather than the default of "Two Weeks".
-    * Add a symlink at `~/.local/share/geary/account_01` that targets the folder `~/Files/000-configuration/gmail-geary-data-backup`, to restore mail data backup and keep the mail data in the backed-up folder.
+    * Copy the contents of `~/Files/000-configuration/gmail-geary-data-backup` into `~/.local/share/geary/account_01`, to restore mail data backup and keep the mail data in the backed-up folder. This can't be a symlink due to Firejail restrictions.
 * Set up VMs in VirtualBox.
+    * Windows VM with Kindle stuff.
+    * Whonix VM for Tor stuff.
 * Set up Zoom for meetings, in an isolated Docker container with minimal filesystem access:
 
         # build and set up Zoom wrapper by mdouchement
@@ -101,13 +94,11 @@ Manual steps required afterward:
         docker run -it --rm  --volume "$HOME/.docker-zoom-us:/target" mdouchement/zoom-us:latest install
 
         # add these aliases to ~/.zshrc to have access to convenient zoom-start and zoom-stop commands
-        alias zoom-start='HOME=~/.docker-zoom-us ~/.docker-zoom-us/zoom'
+        alias zoom-start='HOME=~/.docker-zoom-us ZOOM_EXTRA_DOCKER_ARGUMENTS="--volume=${HOME}/Recordings:/home/zoom/Documents/Zoom" ~/.docker-zoom-us/zoom'
         alias zoom-stop='docker rm $(docker stop $(docker ps -q --filter ancestor=mdouchement/zoom-us:latest))'
 
-
-Temporary steps to workaround specific issues:
-
-* Disable "DDAP Music Sharing" plugin in Rhythmbox (under "Tools > Plugins" menu), since it listens on port 3689, unnecessary attack surface.
+* Set up Chromium with [Zoom Redirector](https://github.com/arkadiyt/zoom-redirector), [React Developer Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?hl=en), and [uBlock Origin](https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm).
+* Set up [broot](https://dystroy.org/broot/install/).
 
 Hardware-specific Setup
 -----------------------
@@ -158,6 +149,6 @@ These are the hardware-specific tweaks:
 
 * I enabled S3 sleep mode ("deep") instead of S0 ("s2idle") by adding `mem_sleep_default=deep` to `GRUB_CMDLINE_LINUX_DEFAULT` in `/etc/default/grub`, so it became `GRUB_CMDLINE_LINUX_DEFAULT="quiet splash mem_sleep_default=deep"`. This makes battery consumption much lower when suspended (from [this AskUbuntu answer](https://askubuntu.com/questions/1029474/ubuntu-18-04-dell-xps13-9370-no-longer-suspends-on-lid-close)).
 * Since there's no hardware mute button, I added a custom shortcut so that Super + Backslash will run this command to toggle mute, and flash the Capslock LED once if unmuting and twice if muting: `sh -c 'if amixer set Capture toggle | grep -q "\[on\]"; then sudo capslock-led 10 0.1; else sudo capslock-led 1010 0.1; fi'`. This uses my custom `capslock-led` script; for more details check out the comments in `files/scripts/capslock-led`.
-* The touchscreen is annoying to use because the onscreen keyboard keeps popping up every time a text field is focused. I installed the [Block Caribou](https://extensions.gnome.org/extension/1326/block-caribou/) GNOME extension to fix this.
-* Sensors are set up with `sudo sensors-detect`. Afterwards, `sensors` gives the right output. I then installed TLP with `sudo apt-get install tlp tlp-rdw` to get better battery life, and tweaked a few power settings in PowerTOP's Tunables tab. This results in the advertised 6 hours of battery life, even with moderately heavy workloads.
-* PulseAudio gave a slight hiss when no audio was playing. To fix this, replace `load-module module-udev-detect` with `load-module module-udev-detect tsched=0` in `/etc/pulse/default.pa` (from https://askubuntu.com/a/1051160).
+* Sensors are set up with `sudo sensors-detect`. Afterwards, `sensors` gives the right output. I then installed TLP with `sudo apt-get install tlp tlp-rdw` to get better battery life. This results in the advertised 6 hours of battery life, even with moderately heavy workloads.
+* Some applications don't scale properly on a HiDPI monitor - set them up so that they're 2x scaled:
+    * Zoom - change `scaleFactor=1` to `scaleFactor=2` in `~/.docker-zoom-us/.config/zoomus.conf` (the usual Zoom configuration file is `.config/zoomus.conf`, but we're running it inside Docker).

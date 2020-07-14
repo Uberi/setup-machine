@@ -29,15 +29,10 @@ source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # misc. config options
 source ~/Dropbox/000-configuration/SCRIPTS_CONFIG.sh
 
-# setup thefuck
-eval "$(thefuck --alias)"
-
 # setup virtualenvwrapper
 export WORKON_HOME=~/.virtualenvwrapper
-mkdir --parents "$WORKON_HOME"
-source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
-alias 'va=mkvirtualenv "--python=$(which python3)" ${PWD##*/}' # create virtualenv for current folder name
-alias 'v+=workon ${PWD##*/}' # activate virtualenv for current folder name
+alias 'va=mkdir --parents "$WORKON_HOME"; source /usr/share/virtualenvwrapper/virtualenvwrapper.sh; mkvirtualenv "--python=$(which python3)" ${PWD##*/}' # create virtualenv for current folder name
+alias 'v+=source /usr/share/virtualenvwrapper/virtualenvwrapper.sh; workon ${PWD##*/}' # activate virtualenv for current folder name
 alias 'v-=deactivate' # deactivate currently activated virtualenv
 
 # generally useful aliases
@@ -123,6 +118,10 @@ alias 'gpg-send=gpg --keyserver keyserver.ubuntu.com --send-keys' # gpg-send KEY
 alias 'gpg-show=gpg --fingerprint --fingerprint' # gpg-show KEY_IDENTIFIER
 alias 'gpg-delete=gpg --delete-keys' # gpg-delete KEY_IDENTIFIER
 
+# arduino-specific aliases
+alias 'arduino-nano-verify=arduino-cli compile --fqbn arduino:avr:nano --warnings all'
+alias 'arduino-nano-upload=arduino-cli compile --fqbn arduino:avr:nano --upload --port /dev/ttyUSB0'
+
 # user-specific aliases
 alias 'run-hdd-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache "/home/az/Dropbox" "/media/az/Backup"'
 alias 'run-usb-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache --exclude=venv "/home/az/Dropbox" "/media/az/BackupUSB"'
@@ -133,3 +132,5 @@ if [ -f '/home/az/google-cloud-sdk/path.zsh.inc' ]; then source '/home/az/google
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/home/az/google-cloud-sdk/completion.zsh.inc' ]; then source '/home/az/google-cloud-sdk/completion.zsh.inc'; fi
+
+source /home/az/.config/broot/launcher/bash/br

@@ -54,12 +54,10 @@
 
     "javascript.updateImportsOnFileMove.enabled": "always",
     "explorer.confirmDragAndDrop": false,
-    "eslint.autoFixOnSave": true,
     "explorer.confirmDelete": false,
     "files.exclude": {
         "**/__pycache__": true
     },
-    "liveshare.featureSet": "insiders",
     "python.linting.flake8Enabled": true,
     "python.linting.flake8Args": ["--ignore=E501"],
     "python.linting.mypyEnabled": true,
@@ -72,6 +70,5 @@
     "window.zoomLevel": 0,
     "extensions.ignoreRecommendations": true,
     "editor.autoClosingQuotes": "never",
-    "html.mirrorCursorOnMatchingTag": false,
     "files.hotExit": "onExitAndWindowClose"
 }
