@@ -86,17 +86,6 @@ Manual steps required afterward:
 * Set up VMs in VirtualBox.
     * Windows VM with Kindle stuff.
     * Whonix VM for Tor stuff.
-* Set up Zoom for meetings, in an isolated Docker container with minimal filesystem access:
-
-        # build and set up Zoom wrapper by mdouchement
-        mkdir -p .docker-zoom-us
-        docker build -t mdouchement/zoom-us github.com/mdouchement/docker-zoom-us
-        docker run -it --rm  --volume "$HOME/.docker-zoom-us:/target" mdouchement/zoom-us:latest install
-
-        # add these aliases to ~/.zshrc to have access to convenient zoom-start and zoom-stop commands
-        alias zoom-start='HOME=~/.docker-zoom-us ZOOM_EXTRA_DOCKER_ARGUMENTS="--volume=${HOME}/Recordings:/home/zoom/Documents/Zoom" ~/.docker-zoom-us/zoom'
-        alias zoom-stop='docker rm $(docker stop $(docker ps -q --filter ancestor=mdouchement/zoom-us:latest))'
-
 * Set up Chromium with [Zoom Redirector](https://github.com/arkadiyt/zoom-redirector), [React Developer Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?hl=en), and [uBlock Origin](https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm).
 * Set up [broot](https://dystroy.org/broot/install/).
 
