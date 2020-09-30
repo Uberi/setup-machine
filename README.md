@@ -26,6 +26,9 @@ Manual steps required beforehand:
     * [mCover Hard Shell Case for Dell XPS 9370/9380](https://www.amazon.ca/iPearl-mCover-models-fitting-Ultrabook/dp/B079TZWQKK/)
 * Back up LUKS headers for encrypted volumes: `sudo cryptsetup luksHeaderBackup /dev/nvme0n1p3 --header-backup-file 'XPS 13 LUKS Header Backup.img'` (then back up the generated img file to other, accessible places).
 * Copy in personal files from backups to `~/Files`.
+* Double check:
+    * That swap and root filesystem are encrypted: `sudo dmsetup status`.
+    * That LUKS headers are backed up for encrypted volumes.
 
 Automatic steps:
 
@@ -42,22 +45,28 @@ Manual steps required afterward:
     * Rust toolchain via [rustup](https://www.rustup.rs/).
     * Google Cloud management via [Google Cloud SDK](https://cloud.google.com/sdk/docs/downloads-apt-get).
     * AWS management via [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html).
-* Install useful VSCode extensions from verified VSIX files:
+* Install and set up useful VSCode extensions from verified VSIX files:
     * `ms-python.python`. Microsoft official.
     * `ms-azuretools.vscode-docker`. Microsoft official.
     * `ms-vscode.cpptools`. Microsoft official.
     * `ms-vscode.vscode-typescript-tslint-plugin`. Microsoft official.
     * `vsciot-vscode.vscode-arduino`. Microsoft official.
+    * `golang.go`. Google official.
     * `vscodevim.vim`.
     * `coenraads.bracket-pair-colorizer-2`.
     * `alefragnani.bookmarks`.
     * `adamwalzer.string-converter`.
     * `oliversturm.fix-json`.
 * Restore bookmarks and user settings in Firefox.
-* Install useful Firefox extensions:
+* Install useful Firefox extensions (NOTE: only install addons that are part of the [Recommended Extensions Program](https://support.mozilla.org/en-US/kb/recommended-extensions-program)):
     * [uBlock Origin](https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/).
     * [Privacy Badger](https://addons.mozilla.org/en-US/firefox/addon/privacy-badger17/).
     * [Auto Tab Discard](https://addons.mozilla.org/en-US/firefox/addon/auto-tab-discard/).
+    * [SingleFile](https://addons.mozilla.org/en-CA/firefox/addon/single-file/).
+    * [Facebook Container](https://addons.mozilla.org/en-CA/firefox/addon/facebook-container/).
+    * [Firefox Multi-Account Containers](https://addons.mozilla.org/en-CA/firefox/addon/multi-account-containers/).
+    * [Stylus](https://addons.mozilla.org/en-CA/firefox/addon/styl-us/).
+    * [Tree Style Tab](https://addons.mozilla.org/en-CA/firefox/addon/tree-style-tab/).
 * Configure Firefox options:
     * `network.IDN_show_punycode` should be true (to avoid IDN homoglyph phishing).
     * `webgl.disabled` should be true (to avoid WebGL attack surface).
@@ -88,6 +97,8 @@ Manual steps required afterward:
     * Whonix VM for Tor stuff.
 * Set up Chromium with [Zoom Redirector](https://github.com/arkadiyt/zoom-redirector), [React Developer Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?hl=en), and [uBlock Origin](https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm).
 * Set up [broot](https://dystroy.org/broot/install/).
+* Various other useful tools:
+    * FreeCAD: `snap install --beta freecad`
 
 Hardware-specific Setup
 -----------------------
@@ -137,7 +148,17 @@ I chose not to install these Dell-specific packages.
 These are the hardware-specific tweaks:
 
 * I enabled S3 sleep mode ("deep") instead of S0 ("s2idle") by adding `mem_sleep_default=deep` to `GRUB_CMDLINE_LINUX_DEFAULT` in `/etc/default/grub`, so it became `GRUB_CMDLINE_LINUX_DEFAULT="quiet splash mem_sleep_default=deep"`. This makes battery consumption much lower when suspended (from [this AskUbuntu answer](https://askubuntu.com/questions/1029474/ubuntu-18-04-dell-xps13-9370-no-longer-suspends-on-lid-close)).
-* Since there's no hardware mute button, I added a custom shortcut so that Super + Backslash will run this command to toggle mute, and flash the Capslock LED once if unmuting and twice if muting: `sh -c 'if amixer set Capture toggle | grep -q "\[on\]"; then sudo capslock-led 10 0.1; else sudo capslock-led 1010 0.1; fi'`. This uses my custom `capslock-led` script; for more details check out the comments in `files/scripts/capslock-led`.
+* Since there's no hardware mute button, I added a custom shortcut so that Super + Backslash will run this command to toggle mute, and flash the Capslock LED once if unmuting and twice if muting: `sh -c 'if amixer set Capture toggle | grep -q "\[on\]"; then sudo /usr/bin/capslock-led 10 0.1; else sudo /usr/bin/capslock-led 1010 0.1; fi'`. This uses my custom `capslock-led` script; for more details check out the comments in `files/scripts/capslock-led`.
 * Sensors are set up with `sudo sensors-detect`. Afterwards, `sensors` gives the right output. I then installed TLP with `sudo apt-get install tlp tlp-rdw` to get better battery life. This results in the advertised 6 hours of battery life, even with moderately heavy workloads.
-* Some applications don't scale properly on a HiDPI monitor - set them up so that they're 2x scaled:
-    * Zoom - change `scaleFactor=1` to `scaleFactor=2` in `~/.docker-zoom-us/.config/zoomus.conf` (the usual Zoom configuration file is `.config/zoomus.conf`, but we're running it inside Docker).
+* I followed [these instructions](https://unix.stackexchange.com/questions/189675/is-there-a-way-to-adjusts-the-brightness-of-the-monitor) for changing the brightness of an external monitor using `ddccontrol`:
+    * Install and load userspace I2C kernel module: `sudo apt-get install i2c-tools ddccontrol; sudo modprobe i2c-dev` (the `ddccontrol` package will configure systemd to load the `i2c-dev` kernel module automatically on boot).
+    * Use `sudo i2cdetect -l` to find all I2C devices, there were several lines containing "DDC", which looked like this: `i2c-7	i2c       	DPDDC-B                         	I2C adapter`.
+    * Tried each `i2c-<N>` value like `sudo ddccontrol dev:/dev/i2c-<N>`. The only one that didn't give a `DDC/CI at dev:/dev/i2c-<N> is unusable (-1).` error was `sudo ddccontrol dev:/dev/i2c-7` - so `/dev/i2c-7` was the right I2C interface.
+    * In the output of `sudo ddccontrol dev:/dev/i2c-7`, the brightness control was listed as `		> id=brightness, name=Brightness, address=0x10, delay=-1ms, type=0`, so `0x10` is the right I2C address.
+    * Tried `sudo ddccontrol dev:/dev/i2c-7 -r 0x10 -w 20`, which set the monitor brightness to 20% of maximum, it worked.
+    * Set up a shell alias `alias monitor-brightness='sudo ddccontrol dev:/dev/i2c-7 -r 0x10 -w'` to easily adjust this in the future.
+
+And some hardware-specific workarounds:
+
+* Sometimes the touchpad stops working after sleeping and then resuming. To fix this when it happens, run `sudo rmmod i2c_hid; sudo modprobe i2c_hid` to reload the I2C HID kernel module.
+* Sometimes upon resuming from sleep, the lock screen fails to show up and the mouse can be moved, but nothing responds. In these cases the lock screen is still present, just not visible - type in your password and press Enter, and it should unlock.

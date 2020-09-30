@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 
 # SETUP PROCEDURE:
-# 1. Copy to `/usr/bin/capslock-led` so it's in a convenient location.
-# 2. Make the script executable and owned by root `sudo chown root:root /usr/bin/capslock-led`.
-# 3. Run `sudo visudo` to edit the sudoers file, then add the following line: `YOUR_USERNAME_HERE ALL=(root) NOPASSWD: /usr/bin/capslock-led` to allow this script to be run using sudo without having to enter your root password.
+# 1. Copy to `~/.local/bin/capslock-led` so it's in a convenient location.
+# 2. Make the script executable and owned by root `chmod +x ~/.local/bin/capslock-led; sudo chown root:root ~/.local/bin/capslock-led`.
+# 3. Run `sudo visudo` to edit the sudoers file, then add the following line: `YOUR_USERNAME_HERE ALL=(root) NOPASSWD: /home/YOUR_USERNAME_HERE/.local/bin/capslock-led` to allow this script to be run using sudo without having to enter your root password.
 
 # Also, the path of the Capslock LED is specific to a Dell XPS13 9380 - you may need to change it to the right path if it's not under `/sys/class/leds/input3`. You can find all LEDs using `ls /sys/class/leds`.
 

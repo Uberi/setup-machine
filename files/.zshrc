@@ -15,7 +15,6 @@ if ! zgen saved; then
     zgen oh-my-zsh plugins/wd
     zgen oh-my-zsh plugins/command-not-found
     zgen load zsh-users/zsh-completions src
-    zgen load lukechilds/zsh-nvm
     zgen save
 fi
 
@@ -121,6 +120,10 @@ alias 'gpg-delete=gpg --delete-keys' # gpg-delete KEY_IDENTIFIER
 # arduino-specific aliases
 alias 'arduino-nano-verify=arduino-cli compile --fqbn arduino:avr:nano --warnings all'
 alias 'arduino-nano-upload=arduino-cli compile --fqbn arduino:avr:nano --upload --port /dev/ttyUSB0'
+
+# random generation
+alias rand-token='echo $(head -c 16 /dev/urandom | xxd -p -c1000)'
+alias rand-password='shuf -n5 /usr/share/dict/american-english | paste -sd " " -'
 
 # user-specific aliases
 alias 'run-hdd-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache "/home/az/Dropbox" "/media/az/Backup"'

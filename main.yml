@@ -35,6 +35,7 @@
       - pavucontrol                   # Pulseaudio application-level volume control
       - pdfshuffler                   # PDF page-level manipulation software
       - qalculate                     # powerful calculator utility
+      - redshift-gtk                  # screen color temperature changer
       - simplescreenrecorder          # screen recorder
       - vim-gtk3                      # text editor
       - vlc                           # media player
@@ -46,47 +47,59 @@
   - name: install common command line apps and developer tools
     apt:
       name:
-      - colordiff         # diff with colors
-      - pandoc            # universal document converter
-      - tree              # sort of like a recursive `ls`
-      - htop              # resource monitor, sort of like a better `top`
-      - nethogs           # process network usage information
-      - evemu-tools       # X event toolkit
-      - lm-sensors        # computer internal sensor support
-      - tmux              # terminal multiplexer
-      - cryptsetup        # tools for working with encrypted volumes
-      - xclip             # clipboard management from the command line
-      - p7zip-full        # support extracting a wider variety of archives than supported by default
-      - curl              # download files from the internet
-      - wget              # download files from the internet
-      - gnupg2            # secure communications toolkit
-      - git               # version control system
-      - ansible           # configuration and deployment system
-      - jekyll            # static blog-aware website generator
-      - ruby-jekyll-watch # auto-reload for static blog aware site generator
-      - pcregrep          # grep with PCRE instead of POSIX regular expressions
-      - powertop          # Intel power management utility
-      - whois             # WHOIS directory client
-      - net-tools         # various networking-related tools
-      - rng-tools         # TRNG interface
-      - traceroute        # network path tracer
-      - checkinstall      # convert software installations into OS packages
-      - jq                # JSON processing with filters
-      - miller            # CSV/TSV/JSON processing with filters
-      - exif              # inspect EXIF data inside photos
-      - restic            # incremental encrypted backups
-      - love              # 2D game engine
-      - rclone            # file synchronization utility for various cloud providers
-      - rsync             # file synchronization utility for synchronization between computers
-      - youtube-dl        # video site downloader
-      - libheif-examples  # programs for working with the HEIF image format (now the default output of iPhone cameras)
-      - sox               # utilities for working with audio
-      - lame              # MP3 encoder and utilities
-      - jupyter-notebook  # Jupyter interactive notebook with Python 3 support
-      - default-jdk       # default Java compiler
-      - moreutils         # useful extra command-line tools
-      - w3m               # text-based web browser
+      - colordiff                 # diff with colors
+      - pandoc                    # universal document converter
+      - texlive-latex-recommended # used by pandoc to generate PDFs
+      - texlive-latex-extra       # used by pandoc to generate PDFs
+      - htop                      # resource monitor, sort of like a better `top`
+      - nethogs                   # process network usage information
+      - evemu-tools               # X event toolkit
+      - lm-sensors                # computer internal sensor support
+      - tmux                      # terminal multiplexer
+      - cryptsetup                # tools for working with encrypted volumes
+      - xclip                     # clipboard management from the command line
+      - p7zip-full                # support extracting a wider variety of archives than supported by default
+      - curl                      # download files from the internet
+      - wget                      # download files from the internet
+      - gnupg2                    # secure communications toolkit
+      - git                       # version control system
+      - ansible                   # configuration and deployment system
+      - jekyll                    # static blog-aware website generator
+      - ruby-jekyll-watch         # auto-reload for static blog aware site generator
+      - pcregrep                  # grep with PCRE instead of POSIX regular expressions
+      - powertop                  # Intel power management utility
+      - whois                     # WHOIS directory client
+      - net-tools                 # various networking-related tools
+      - iputils-ping              # ping hosts via ICMP
+      - rng-tools                 # TRNG interface
+      - traceroute                # network path tracer
+      - checkinstall              # convert software installations into OS packages
+      - jq                        # JSON processing with filters
+      - miller                    # CSV/TSV/JSON processing with filters
+      - exif                      # inspect EXIF data inside photos
+      - restic                    # incremental encrypted backups
+      - love                      # 2D game engine
+      - rclone                    # file synchronization utility for various cloud providers
+      - rsync                     # file synchronization utility for synchronization between computers
+      - youtube-dl                # video site downloader
+      - libheif-examples          # programs for working with the HEIF image format (now the default output of iPhone cameras)
+      - sox                       # utilities for working with audio
+      - lame                      # MP3 encoder and utilities
+      - jupyter-notebook          # Jupyter interactive notebook with Python 3 support
+      - default-jdk               # default Java compiler
+      - moreutils                 # useful extra command-line tools
+      - w3m                       # text-based web browser
+      - expect                    # command line automation
+      - shellcheck                # shell script linter
+      - xdotool                   # programmatically send keystrokes and other input events
     become: yes
+
+  - name: install VPN stuff
+    apt:
+      name:
+        - wireguard                     # VPN client/server
+        - network-manager-openvpn       # OpenVPN support in NetworkManager
+        - network-manager-openvpn-gnome # actual UI for OpenVPN connections in NetworkManager's GUI
 
   - name: install Yubikey 4 stuff
     apt:
@@ -103,6 +116,7 @@
       name:
       - build-essential # many useful build tools
       - cmake           # compiler-independent build system
+      - autoconf        # another compiler-independent build system (I like CMake more though)
       - ffmpeg          # media encoders/decoders
       - libjpeg-dev     # JPEG libraries
       - libpng-dev      # PNG libraries
@@ -236,12 +250,22 @@
 
   - name: install FireJail and set it up with the basic profiles
     block:
+      - apt: name=firejail
       - shell:
           cmd: firecfg
           creates: /usr/local/bin/firefox
         become: yes
-      - file: path=/usr/local/bin/zeal state=absent  # Firejail isolation breaks Zeal, because Firejail's Zeal profile disallows network access, so remove Firejail's Zeal shortcut # TODO: review this again in 2021
-        become: yes
+  
+  # UPGRADEABLE: LAST UPDATE 2020-07-12 (check if these profiles are still broken)
+  - name: remove Zeal profile for Firejail, because the Zeal profile disallows network access
+    file: path=/usr/local/bin/zeal state=absent
+    become: yes
+  - name: remove SimpleScreenRecorder profile for Firejail, because the SimpleScreenRecorder profile disallows tray icon registration
+    file: path=/usr/local/bin/simplescreenrecorder state=absent
+    become: yes
+  - name: remove pavucontrol profile for Firejail, because the pavucontrol profile disallows config changes
+    file: path=/usr/local/bin/pavucontrol state=absent
+    become: yes
 
   - name: install and set up Docker
     block:
@@ -252,7 +276,7 @@
       - user: name={{ user_name }} groups=docker append=yes
         become: yes
 
-  # UPGRADEABLE: LAST UPDATE 2020-07-12
+  # UPGRADEABLE: LAST UPDATE 2020-07-12 (upgrade to a new version)
   - name: install Arduino CLI
     block:
       - get_url:
@@ -280,7 +304,7 @@
       - xfconf: channel=xfwm4 property=/general/theme value_type=string value=Numix
 
       # disable Alt + Drag to move a window, this interferes with apps like Blender that use that for their own purposes
-      - xfconf: channel=xfwm4 property=/general/easy_click value_type=string value=dummy state=absent
+      - xfconf: channel=xfwm4 property=/general/easy_click value_type=string value=None
 
       # show window previews in Alt + Tab window switcher
       - xfconf: channel=xfwm4 property=/general/cycle_preview value_type=bool value=true
@@ -298,14 +322,29 @@
       # set Win + F to open file manager
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>f" value_type=string value="thunar Dropbox"
 
+      # set Win + Shift + F to open file manager as root
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>f" value_type=string value="pkexec thunar /home/{{ user_name }}/Dropbox"
+
       # set Win + S to open Clipman
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>s" value_type=string value=xfce4-popup-clipman
 
+      # set Win + Shift + 0 through Win + Shift + 9 to type Numpad0 through Numpad9 respectively
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>parenright" value_type=string value="sh -c 'xdotool keyup 0; xdotool key --clearmodifiers KP_Insert'"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>exclam" value_type=string value="sh -c 'xdotool keyup 1; xdotool key --clearmodifiers KP_End'"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>at" value_type=string value="sh -c 'xdotool keyup 2; xdotool key --clearmodifiers KP_Down'"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>numbersign" value_type=string value="sh -c 'xdotool keyup 3; xdotool key --clearmodifiers KP_Page_Down'"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>dollar" value_type=string value="sh -c 'xdotool keyup 4; xdotool key --clearmodifiers KP_Left'"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>percent" value_type=string value="sh -c 'xdotool keyup 5; xdotool key --clearmodifiers KP_Begin'"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>asciicircum" value_type=string value="sh -c 'xdotool keyup 6; xdotool key --clearmodifiers KP_Right'"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>ampersand" value_type=string value="sh -c 'xdotool keyup 7; xdotool key --clearmodifiers KP_Home'"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>asterisk" value_type=string value="sh -c 'xdotool keyup 8; xdotool key --clearmodifiers KP_Up'"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>parenleft" value_type=string value="sh -c 'xdotool keyup 9; xdotool key --clearmodifiers KP_Page_Up'"
+
       # set Win + / to toggle maximize
-      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>slash" value_type=string value=maximize_window_key
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/xfwm4/custom/<Super>slash" value_type=string value=maximize_window_key
 
       # set Win + F11 to toggle fullscreen
-      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>F11" value_type=string value=fullscreen_key
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/xfwm4/custom/<Super>F11" value_type=string value=fullscreen_key
 
       # set laptop lid close to suspend the laptop, both on battery and when plugged in
       - xfconf: channel=xfce4-power-manager property=/xfce4-power-manager/lid-action-on-battery value_type=int value=1
@@ -325,6 +364,15 @@
       # load top panel configuration profile (generated by using `xfce4-panel-profiles save xfce-panel-config.tar.bz2`, this saves the current top panel configuration)
       - copy: src=files/xfce-panel-config.tar.bz2 dest=/tmp/xfce-panel-config.tar.bz2
       - shell: xfce4-panel-profiles load /tmp/xfce-panel-config.tar.bz2
+
+  - name: make Redshift autostart on login
+    copy: src=files/redshift-gtk.desktop dest=~/.config/autostart/redshift-gtk.desktop
+
+  - name: set default program to open a directory to Thunar # TODO: this is a workaround for the default opener being set to Nautilus on Xubuntu 20.04
+    lineinfile:
+      path: /usr/share/applications/defaults.list
+      regexp: '^inode/directory='
+      line: inode/directory=thunar.desktop
 
   - name: configure Git
     git_config: name={{ item.name }} scope=global value={{ item.value }}

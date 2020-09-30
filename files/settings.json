@@ -9,6 +9,11 @@
     "editor.renderControlCharacters": false,
     "editor.renderIndentGuides": true,
     "editor.autoClosingBrackets": "never",
+    "editor.autoClosingQuotes": "never",
+    "explorer.confirmDragAndDrop": false,
+    "explorer.confirmDelete": false,
+    "window.titleBarStyle": "custom",
+    "window.zoomLevel": 2,
     "window.newWindowDimensions": "maximized",
     "debug.inlineValues": true,
     "bracket-pair-colorizer-2.forceIterationColorCycle": true,
@@ -17,6 +22,7 @@
     "bracket-pair-colorizer-2.showBracketsInGutter": true,
     "bookmarks.navigateThroughAllFiles": true,
     "bookmarks.saveBookmarksInProject": true,
+    "files.hotExit": "onExitAndWindowClose",
     "editor.cursorStyle": "block",
     "editor.cursorBlinking": "blink",
     "editor.find.seedSearchStringFromSelection": false, // don't change the Find query to the current selection
@@ -32,6 +38,8 @@
     "update.showReleaseNotes": false,
     "extensions.autoCheckUpdates": false,
     "extensions.showRecommendationsOnlyOnDemand": true,
+    "json.schemaDownload.enable": false,
+    "npm.fetchOnlinePackageInfo": false,
 
     // disable updates (instead, VSCode updated by package manager, extensions updated manually)
     "update.mode": "none",
@@ -53,8 +61,6 @@
     "vim.startInInsertMode": false,
 
     "javascript.updateImportsOnFileMove.enabled": "always",
-    "explorer.confirmDragAndDrop": false,
-    "explorer.confirmDelete": false,
     "files.exclude": {
         "**/__pycache__": true
     },
@@ -66,9 +72,9 @@
     ],
     "python.linting.pylintEnabled": false,
     "python.pythonPath": "/usr/bin/python3",
-    "window.titleBarStyle": "custom",
-    "window.zoomLevel": 0,
     "extensions.ignoreRecommendations": true,
-    "editor.autoClosingQuotes": "never",
-    "files.hotExit": "onExitAndWindowClose"
+    "go.useGoProxyToCheckForToolUpdates": false,
+    "go.formatTool": "gofmt",
+    "liveshare.connectionMode": "relay",
+    "go.autocompleteUnimportedPackages": true,
 }
