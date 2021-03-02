@@ -11,7 +11,6 @@
       - calibre                       # ebook editor, viewer, converter, manager
       - chromium-browser              # web browser
       - clementine                    # music player/manager
-      - copyq                         # powerful clipboard manager utility
       - create-resources              # additional resources for GIMP/Blender/Inkscape
       - darktable                     # processor for RAW images
       - dconf-editor                  # settings editor
@@ -25,6 +24,7 @@
       - gimp-help-en                  # image editor documentation
       - gparted                       # partition editor
       - inkscape                      # vector graphics editor
+      - kakoune                       # text editor
       - kdenlive                      # video editor
       - kicad                         # electronics CAD software
       - kicad-doc-en                  # electronics CAD software documentation
@@ -92,6 +92,9 @@
       - expect                    # command line automation
       - shellcheck                # shell script linter
       - xdotool                   # programmatically send keystrokes and other input events
+      - catimg                    # command line image viewer (renders images to colored unicode characters)
+      - mitmproxy                 # programmable intercepting HTTP proxy
+      - cgdb                      # text-mode UI for GDB
     become: yes
 
   - name: install VPN stuff
@@ -135,10 +138,7 @@
       name:
       - sqlite3
       - sqlitebrowser
-      - postgresql-all
       - postgresql-client
-      - postgresql-doc
-      - pgadmin3
       - redis
     become: yes
 
@@ -196,7 +196,6 @@
       - python3-pyperclip
       - python3-venv
       - python3-q
-      - virtualenvwrapper
       - twine
     become: yes
 
@@ -276,13 +275,13 @@
       - user: name={{ user_name }} groups=docker append=yes
         become: yes
 
-  # UPGRADEABLE: LAST UPDATE 2020-07-12 (upgrade to a new version)
+  # UPGRADEABLE: LAST UPDATE 2021-02-28 (upgrade to a new version)
   - name: install Arduino CLI
     block:
       - get_url:
-          checksum: sha512:efebdecd881da4cbb6a6351682fab07ac3199474168c6b693f3a1f8b8b072387ba83b979e09e2ddfd03e49e8cff767c56bc77f0b78eb143af98215aa992cdf6f
+          checksum: sha256:b9f14044c2d6c7451bc23b18bfd1323b552a235edbc84e84c9823ad272e63976
           dest: "/tmp/arduino-cli-linux.tar.xz"
-          url: https://downloads.arduino.cc/arduino-cli/arduino-cli_0.11.0_Linux_64bit.tar.gz
+          url: https://github.com/arduino/arduino-cli/releases/download/0.16.1/arduino-cli_0.16.1_Linux_64bit.tar.gz
       - unarchive: remote_src=yes dest=/tmp/ src="/tmp/arduino-cli-linux.tar.xz"
       - copy: remote_src=yes src=/tmp/arduino-cli dest=~/.local/bin/arduino-cli
       - shell:
@@ -299,9 +298,9 @@
       # install some extra XFCE stuff such as clipman
       - apt: name=xfce4-goodies
 
-      # set theme to Numix
-      - xfconf: channel=xsettings property=/Net/ThemeName value_type=string value=Numix
-      - xfconf: channel=xfwm4 property=/general/theme value_type=string value=Numix
+      # set theme to Adwaita Dark
+      - xfconf: channel=xsettings property=/Net/ThemeName value_type=string value=Adwaita-dark
+      - xfconf: channel=xfwm4 property=/general/theme value_type=string value=Adwaita-dark
 
       # disable Alt + Drag to move a window, this interferes with apps like Blender that use that for their own purposes
       - xfconf: channel=xfwm4 property=/general/easy_click value_type=string value=None
@@ -327,6 +326,11 @@
 
       # set Win + S to open Clipman
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>s" value_type=string value=xfce4-popup-clipman
+
+      # set Win + F4, Win + F5, Win + F6 to control Clementine
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/xfwm4/custom/<Super>F4" value_type=string value="clementine --previous"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/xfwm4/custom/<Super>F5" value_type=string value="clementine --play-pause"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/xfwm4/custom/<Super>F6" value_type=string value="clementine --next"
 
       # set Win + Shift + 0 through Win + Shift + 9 to type Numpad0 through Numpad9 respectively
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>parenright" value_type=string value="sh -c 'xdotool keyup 0; xdotool key --clearmodifiers KP_Insert'"
@@ -382,7 +386,17 @@
       - { name: "user.name", value: "{{ real_name }}" }         # user's real name
       - { name: "user.email", value: "{{ email }}" }            # user's real name
       - { name: "diff.tool", value: "meld" }                    # diff viewer utility
-      - { name: "core.pager", value: "less --chop-long-lines" } # disable word wrap in git diff
+
+  # UPGRADEABLE: LAST UPDATE 2021-02-20 (upgrade to a new version)
+  - name: install Delta and configure it as the Git pager
+    block:
+      - get_url:
+          checksum: sha512:131a13f24625df62be99eecce1ae48c910bc86fd261087bdeb0f8a769b2a9cf22b0f472b3eb6bd0b3f3b4387b16eed2e051b161e84a073bd1619560a913e1af3
+          dest: "/tmp/delta-linux-gnu.tar.gz"
+          url: https://github.com/dandavison/delta/releases/download/0.6.0/delta-0.6.0-x86_64-unknown-linux-gnu.tar.gz
+      - unarchive: remote_src=yes dest=/tmp/ src="/tmp/delta-linux-gnu.tar.gz"
+      - copy: remote_src=yes src=/tmp/delta-0.6.0-x86_64-unknown-linux-gnu/delta dest=~/.local/bin/delta
+      - git_config: name=core.pager scope=global value=delta
 
   - name: disable unnecessary network-facing services such as Avahi/Bonjour and CUPS
     block:

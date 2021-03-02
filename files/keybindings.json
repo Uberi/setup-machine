@@ -15,15 +15,12 @@
     {"key": "End", "command": "extension.vim_end", "when": "editorTextFocus && !inDebugRepl && vim.mode == 'Insert'"},
 
     // insert matched pairs using Ctrl + opening character
-    {"key": "ctrl+shift+9", "command": "vim.remap", "args": {"after": ["(", ")", "<Left>"]}, "when": "editorTextFocus && !inDebugRepl && vim.mode == 'Insert'"},
-    {"key": "ctrl+[", "command": "vim.remap", "args": {"after": ["[", "]", "<Left>"]}, "when": "editorTextFocus && !inDebugRepl && vim.mode == 'Insert'"},
-    {"key": "ctrl+shift+[", "command": "vim.remap", "args": {"after": ["{", "}", "<Left>"]}, "when": "editorTextFocus && !inDebugRepl && vim.mode == 'Insert'"},
-    {"key": "ctrl+shift+4", "command": "vim.remap", "args": {"after": ["$", "$", "<Left>"]}, "when": "editorTextFocus && !inDebugRepl && vim.mode == 'Insert'"},
-    {"key": "ctrl+shift+,", "command": "vim.remap", "args": {"after": ["<", ">", "<Left>"]}, "when": "editorTextFocus && !inDebugRepl && vim.mode == 'Insert'"},
-    {"key": "ctrl+'", "command": "vim.remap", "args": {"after": ["'", "'", "<Left>"]}, "when": "editorTextFocus && !inDebugRepl && vim.mode == 'Insert'"},
-    {"key": "ctrl+shift+'", "command": "vim.remap", "args": {"after": ["\"", "\"", "<Left>"]}, "when": "editorTextFocus && !inDebugRepl && vim.mode == 'Insert'"},
-    {"key": "ctrl+shift+8", "command": "vim.remap", "args": {"after": ["*", "*", "<Left>"]}, "when": "editorTextFocus && !inDebugRepl && vim.mode == 'Insert'"},
-
-    // useful macros
-    {"key": "ctrl+shift+m", "command": "vim.remap", "args": {"after": ["\\", "b", "e", "g", "i", "n", "{", "b", "m", "a", "t", "r", "i", "x", "}", " ", " ", "\\", "e", "n", "d", "{", "b", "m", "a", "t", "r", "i", "x", "}", "<Esc>", "1", "3", "h", "i"]}, "when": "editorTextFocus && !inDebugRepl && vim.mode == 'Insert'"}
+    {"key": "ctrl+shift+9", "command": "editor.action.insertSnippet", "when": "editorTextFocus", "args": {"snippet": "($0)"}},
+    {"key": "ctrl+[", "command": "editor.action.insertSnippet", "when": "editorTextFocus", "args": {"snippet": "[$0]"}},
+    {"key": "ctrl+shift+[", "command": "editor.action.insertSnippet", "when": "editorTextFocus", "args": {"snippet": "{$0}"}},
+    {"key": "ctrl+shift+4", "command": "editor.action.insertSnippet", "when": "editorTextFocus", "args": {"snippet": "$$$0$$"}},
+    {"key": "ctrl+shift+,", "command": "editor.action.insertSnippet", "when": "editorTextFocus", "args": {"snippet": "<$0>"}},
+    {"key": "ctrl+'", "command": "editor.action.insertSnippet", "when": "editorTextFocus", "args": {"snippet": "'$0'"}},
+    {"key": "ctrl+shift+'", "command": "editor.action.insertSnippet", "when": "editorTextFocus", "args": {"snippet": "\"$0\""}},
+    {"key": "ctrl+shift+8", "command": "editor.action.insertSnippet", "when": "editorTextFocus", "args": {"snippet": "*$0*"}},
 ]

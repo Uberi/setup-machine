@@ -26,9 +26,11 @@ Manual steps required beforehand:
     * [mCover Hard Shell Case for Dell XPS 9370/9380](https://www.amazon.ca/iPearl-mCover-models-fitting-Ultrabook/dp/B079TZWQKK/)
 * Back up LUKS headers for encrypted volumes: `sudo cryptsetup luksHeaderBackup /dev/nvme0n1p3 --header-backup-file 'XPS 13 LUKS Header Backup.img'` (then back up the generated img file to other, accessible places).
 * Copy in personal files from backups to `~/Files`.
+* Disable Bluetooth at a hardware level if there's a killswitch on the machine, at a BIOS level if the option exists, or at the OS level by running `systemctl disable bluetooth.service`.
 * Double check:
     * That swap and root filesystem are encrypted: `sudo dmsetup status`.
     * That LUKS headers are backed up for encrypted volumes.
+    * That Bluetooth is unavailable on the system.
 
 Automatic steps:
 
@@ -57,6 +59,7 @@ Manual steps required afterward:
     * `alefragnani.bookmarks`.
     * `adamwalzer.string-converter`.
     * `oliversturm.fix-json`.
+    * `gregoire.dance`.
 * Restore bookmarks and user settings in Firefox.
 * Install useful Firefox extensions (NOTE: only install addons that are part of the [Recommended Extensions Program](https://support.mozilla.org/en-US/kb/recommended-extensions-program)):
     * [uBlock Origin](https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/).
@@ -66,7 +69,8 @@ Manual steps required afterward:
     * [Facebook Container](https://addons.mozilla.org/en-CA/firefox/addon/facebook-container/).
     * [Firefox Multi-Account Containers](https://addons.mozilla.org/en-CA/firefox/addon/multi-account-containers/).
     * [Stylus](https://addons.mozilla.org/en-CA/firefox/addon/styl-us/).
-    * [Tree Style Tab](https://addons.mozilla.org/en-CA/firefox/addon/tree-style-tab/).
+    * [Feedbro](https://addons.mozilla.org/en-US/firefox/addon/feedbroreader/).
+    * [DarkReader](https://addons.mozilla.org/en-US/firefox/addon/darkreader/).
 * Configure Firefox options:
     * `network.IDN_show_punycode` should be true (to avoid IDN homoglyph phishing).
     * `webgl.disabled` should be true (to avoid WebGL attack surface).
@@ -99,6 +103,7 @@ Manual steps required afterward:
 * Set up [broot](https://dystroy.org/broot/install/).
 * Various other useful tools:
     * FreeCAD: `snap install --beta freecad`
+    * Beekeeper Studio: `snap install beekeeper-studio`
 
 Hardware-specific Setup
 -----------------------
@@ -112,7 +117,7 @@ Hardware-specific Setup
 
 ### Dell XPS 9380 Developer Edition
 
-I installed Ubuntu 19.04 and set up the BIOS to require passwords for power-on and changing UEFI settings.
+I installed Ubuntu and set up the BIOS to require passwords for power-on and changing UEFI settings. To enter the BIOS configuration UI, press F2 during boot.
 
 The laptop comes preloaded with Ubuntu 18.04, pretty much vanilla except for the following additional packages:
 
@@ -157,8 +162,9 @@ These are the hardware-specific tweaks:
     * In the output of `sudo ddccontrol dev:/dev/i2c-7`, the brightness control was listed as `		> id=brightness, name=Brightness, address=0x10, delay=-1ms, type=0`, so `0x10` is the right I2C address.
     * Tried `sudo ddccontrol dev:/dev/i2c-7 -r 0x10 -w 20`, which set the monitor brightness to 20% of maximum, it worked.
     * Set up a shell alias `alias monitor-brightness='sudo ddccontrol dev:/dev/i2c-7 -r 0x10 -w'` to easily adjust this in the future.
+* I turned off `Video > Dynamic Brightness Control` in the BIOS settings, since it was constantly changing the whole screen's brightness when part of the screen showed something with a different brightness (e.g., editor is dark gray, autocomplete popup is light gray, so everytime autocomplete shows up, the entire screen gets slightly dimmer).
 
 And some hardware-specific workarounds:
 
 * Sometimes the touchpad stops working after sleeping and then resuming. To fix this when it happens, run `sudo rmmod i2c_hid; sudo modprobe i2c_hid` to reload the I2C HID kernel module.
-* Sometimes upon resuming from sleep, the lock screen fails to show up and the mouse can be moved, but nothing responds. In these cases the lock screen is still present, just not visible - type in your password and press Enter, and it should unlock.
+* Sometimes upon resuming from sleep, the lock screen fails to show up and the mouse can be moved, but nothing responds. In these cases the lock screen is still present, just not visible - type in your password and press Enter, and it should unlock. It may take a few attempts.

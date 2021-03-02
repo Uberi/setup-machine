@@ -28,13 +28,8 @@ source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # misc. config options
 source ~/Dropbox/000-configuration/SCRIPTS_CONFIG.sh
 
-# setup virtualenvwrapper
-export WORKON_HOME=~/.virtualenvwrapper
-alias 'va=mkdir --parents "$WORKON_HOME"; source /usr/share/virtualenvwrapper/virtualenvwrapper.sh; mkvirtualenv "--python=$(which python3)" ${PWD##*/}' # create virtualenv for current folder name
-alias 'v+=source /usr/share/virtualenvwrapper/virtualenvwrapper.sh; workon ${PWD##*/}' # activate virtualenv for current folder name
-alias 'v-=deactivate' # deactivate currently activated virtualenv
-
 # generally useful aliases
+alias 'c=cat'
 alias 'l=ls -l --all --human-readable --color'
 alias 'clip=xclip -selection c'
 alias 's=grep --line-number --dereference-recursive --binary-files=without-match'
@@ -42,8 +37,10 @@ alias 'f=find -name'
 alias 'disk-usage=du -shc'
 alias 'network-status=sudo netstat -peanut'
 alias 'shell-history=fc -li 1' # shell history with dates
-alias 'changed-files=find . -type f -print0 | xargs -0 stat --format "%Z :%z %n" | sort -nr | cut -d: -f2- | head -n 50' # most recently changed 50 files
+alias 'changed-files=find . -type f -print0 | xargs -0 stat --format "%Z :%z %n" | sort -nr | cut -d: -f2- | head -n 50' # most recently changed 50 files in the current folder
 alias 'flatten=mv ./*/**/*(.D) .'
+alias 'notif=notify-send "Completed!" "The long-running operation just completed"'
+alias 'docker-clean-logs=sudo sh -c "truncate -s 0 /var/lib/docker/containers/*/*-json.log"'
 
 # useful archiving aliases
 alias 'archive-tgz=tar --create --gzip --verbose --file' # `archive-tgz TGZ_FILE_TO_CREATE FILES*`
@@ -64,11 +61,13 @@ alias 'gu=git pull'
 alias 'gur=git pull --rebase'
 alias 'gb=git branch'
 alias 'gbd=git branch --delete'
-alias 'gbl=git branch --list --all'
+alias "gbl=git for-each-ref refs/heads --color=always --sort -committerdate --format='%(HEAD)%(color:reset);%(color:yellow)%(refname:short)%(color:reset);%(contents:subject);%(color:green)(%(committerdate:relative))%(color:blue);<%(authorname)>' | column -t -s ';'"  # show branches ordered by most recently modified
 alias 'gs=git status'
 alias 'gsh=git show'
-alias 'gd=git diff'
-alias 'gdc=git diff --cached'
+alias 'gd=DELTA_FEATURES=side-by-side git diff'
+alias 'gdc=DELTA_FEATURES=side-by-side git diff --cached'
+alias 'gdw=git diff'
+alias 'gdcw=git diff --cached'
 alias 'gdt=git difftool --dir-diff --tool=meld --no-prompt'
 alias 'gdtc=git difftool --cached --dir-diff --tool=meld --no-prompt'
 alias 'ga=git add'
@@ -123,17 +122,16 @@ alias 'arduino-nano-upload=arduino-cli compile --fqbn arduino:avr:nano --upload 
 
 # random generation
 alias rand-token='echo $(head -c 16 /dev/urandom | xxd -p -c1000)'
-alias rand-password='shuf -n5 /usr/share/dict/american-english | paste -sd " " -'
+alias rand-password='grep -v "['"'"'A-Z]" /usr/share/dict/american-english | shuf -n5 | paste -sd " " -'
+
+# development-mode postgres, stores all data in the current directory under "__POSTGRESQL_DATA__", run it in one terminal then connect in another using `psql postgresql://postgres:postgres@localhost:5432/postgres`
+alias 'devpostgres=docker run -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -v $(pwd)/__POSTGRESQL_DATA__:/var/lib/postgresql/data --network host postgres'
 
 # user-specific aliases
-alias 'run-hdd-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache "/home/az/Dropbox" "/media/az/Backup"'
-alias 'run-usb-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache --exclude=venv "/home/az/Dropbox" "/media/az/BackupUSB"'
+alias 'run-hdd-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache --exclude=.transformers --exclude=venv --exclude=vendor "/home/az/Dropbox" "/media/az/Backup"'
+alias 'run-usb-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache --exclude=.transformers --exclude=venv --exclude=vendor "/home/az/Dropbox" "/media/az/BackupUSB"'
 alias 'sync-hyplabs-gdrive=rclone copy --progress hyplabs: ~/Dropbox/Hypotenuse/GDrive --drive-alternate-export'
-
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/home/az/google-cloud-sdk/path.zsh.inc' ]; then source '/home/az/google-cloud-sdk/path.zsh.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/home/az/google-cloud-sdk/completion.zsh.inc' ]; then source '/home/az/google-cloud-sdk/completion.zsh.inc'; fi
+alias 'notif-listen=while true; do if [ -f .devenv-notify ]; then rm .devenv-notify; notify-send "Completed!" "The long-running operation just completed"; fi; sleep 3; done'  # supports the `notif` command in devenv, which just does `touch .devenv-notify`
+alias 'clip-listen=while true; do if [ -f .devenv-clipboard ]; then cat .devenv-clipboard | xclip -selection c; rm .devenv-clipboard; notify-send "Copied!" "Value was copied to clipboard"; fi; sleep 3; done'  # supports the `notif` command in devenv, which just does `tee $HOME/app/.devenv-clipboard`
 
 source /home/az/.config/broot/launcher/bash/br

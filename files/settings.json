@@ -13,7 +13,7 @@
     "explorer.confirmDragAndDrop": false,
     "explorer.confirmDelete": false,
     "window.titleBarStyle": "custom",
-    "window.zoomLevel": 2,
+    "window.zoomLevel": 3,
     "window.newWindowDimensions": "maximized",
     "debug.inlineValues": true,
     "bracket-pair-colorizer-2.forceIterationColorCycle": true,
@@ -23,8 +23,6 @@
     "bookmarks.navigateThroughAllFiles": true,
     "bookmarks.saveBookmarksInProject": true,
     "files.hotExit": "onExitAndWindowClose",
-    "editor.cursorStyle": "block",
-    "editor.cursorBlinking": "blink",
     "editor.find.seedSearchStringFromSelection": false, // don't change the Find query to the current selection
 
     "keyboard.dispatch": "keyCode", // make keyboard shortcuts play nice with keyboard layouts where CapsLock and Esc are swapped (like when it's changed in GNOME Tweak)
@@ -37,7 +35,6 @@
     "workbench.settings.enableNaturalLanguageSearch": false,
     "update.showReleaseNotes": false,
     "extensions.autoCheckUpdates": false,
-    "extensions.showRecommendationsOnlyOnDemand": true,
     "json.schemaDownload.enable": false,
     "npm.fetchOnlinePackageInfo": false,
 
@@ -62,10 +59,14 @@
 
     "javascript.updateImportsOnFileMove.enabled": "always",
     "files.exclude": {
-        "**/__pycache__": true
+        "**/__pycache__": true,
+        "**/node_modules": true,
+        "**/venv": true
     },
     "python.linting.flake8Enabled": true,
-    "python.linting.flake8Args": ["--ignore=E501"],
+    "python.linting.flake8Args": [
+        "--ignore=E501,E402"
+    ],
     "python.linting.mypyEnabled": true,
     "python.linting.mypyArgs": [
         "--ignore-missing-imports"
@@ -75,6 +76,9 @@
     "extensions.ignoreRecommendations": true,
     "go.useGoProxyToCheckForToolUpdates": false,
     "go.formatTool": "gofmt",
-    "liveshare.connectionMode": "relay",
     "go.autocompleteUnimportedPackages": true,
+    "python.experiments.enabled": false,
+    "python.showStartPage": false,
+    "python.languageServer": "Pylance",
+    "settingsSync.keybindingsPerPlatform": false,
 }
