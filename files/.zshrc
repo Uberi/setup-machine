@@ -29,7 +29,7 @@ source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/Dropbox/000-configuration/SCRIPTS_CONFIG.sh
 
 # generally useful aliases
-alias 'c=cat'
+alias 'c=cat --show-nonprinting'
 alias 'l=ls -l --all --human-readable --color'
 alias 'clip=xclip -selection c'
 alias 's=grep --line-number --dereference-recursive --binary-files=without-match'
@@ -70,8 +70,9 @@ alias 'gdw=git diff'
 alias 'gdcw=git diff --cached'
 alias 'gdt=git difftool --dir-diff --tool=meld --no-prompt'
 alias 'gdtc=git difftool --cached --dir-diff --tool=meld --no-prompt'
-alias 'ga=git add'
-alias 'gau=git add --update'
+unalias ga gau  # remove aliases that were added by the git plugin in Oh-My-Zsh
+ga () { git add "$@"; git status }
+gau () { git add --update "$@"; git status }
 alias 'gc=git commit'
 alias 'gcm=git commit -m'
 alias 'gk=git checkout'
@@ -127,11 +128,15 @@ alias rand-password='grep -v "['"'"'A-Z]" /usr/share/dict/american-english | shu
 # development-mode postgres, stores all data in the current directory under "__POSTGRESQL_DATA__", run it in one terminal then connect in another using `psql postgresql://postgres:postgres@localhost:5432/postgres`
 alias 'devpostgres=docker run -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -v $(pwd)/__POSTGRESQL_DATA__:/var/lib/postgresql/data --network host postgres'
 
+# development-mode redis, no persistent storage, run it in one terminal then connect in another using `redis-cli -u redis://localhost:6379`
+alias 'devredis=docker run --network host redis'
+
 # user-specific aliases
 alias 'run-hdd-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache --exclude=.transformers --exclude=venv --exclude=vendor "/home/az/Dropbox" "/media/az/Backup"'
 alias 'run-usb-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache --exclude=.transformers --exclude=venv --exclude=vendor "/home/az/Dropbox" "/media/az/BackupUSB"'
 alias 'sync-hyplabs-gdrive=rclone copy --progress hyplabs: ~/Dropbox/Hypotenuse/GDrive --drive-alternate-export'
 alias 'notif-listen=while true; do if [ -f .devenv-notify ]; then rm .devenv-notify; notify-send "Completed!" "The long-running operation just completed"; fi; sleep 3; done'  # supports the `notif` command in devenv, which just does `touch .devenv-notify`
 alias 'clip-listen=while true; do if [ -f .devenv-clipboard ]; then cat .devenv-clipboard | xclip -selection c; rm .devenv-clipboard; notify-send "Copied!" "Value was copied to clipboard"; fi; sleep 3; done'  # supports the `notif` command in devenv, which just does `tee $HOME/app/.devenv-clipboard`
+alias 'dl=devenv-lite'
 
 source /home/az/.config/broot/launcher/bash/br

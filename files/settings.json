@@ -81,4 +81,6 @@
     "python.showStartPage": false,
     "python.languageServer": "Pylance",
     "settingsSync.keybindingsPerPlatform": false,
+    "typescript.disableAutomaticTypeAcquisition": true,
+    "python.analysis.typeCheckingMode": "basic",
 }

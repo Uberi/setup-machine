@@ -142,14 +142,6 @@
       - redis
     become: yes
 
-  - name: install javascript development tools and common libraries
-    apt:
-      name:
-      - nodejs
-      - npm
-      - yarnpkg
-    become: yes
-
   - name: install VSCode
     block:
       - apt_key: id=BC528686B50D79E339D3721CEB3E94ADBE1229CF url=http://packages.microsoft.com/keys/microsoft.asc
@@ -323,6 +315,9 @@
 
       # set Win + Shift + F to open file manager as root
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>f" value_type=string value="pkexec thunar /home/{{ user_name }}/Dropbox"
+
+      # set Win + = to suspend the system (sleep mode)
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>equal" value_type=string value="systemctl suspend"
 
       # set Win + S to open Clipman
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>s" value_type=string value=xfce4-popup-clipman
