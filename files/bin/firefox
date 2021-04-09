@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# start Firefox with Firejail and a 12GB hard memory limit
+firejail --profile=firefox --rlimit-as=12000000000 /usr/bin/firefox
