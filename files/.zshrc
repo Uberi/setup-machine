@@ -131,10 +131,16 @@ alias 'devpostgres=docker run -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=pos
 # development-mode redis, no persistent storage, run it in one terminal then connect in another using `redis-cli -u redis://localhost:6379`
 alias 'devredis=docker run --network host redis'
 
+# development-mode mongo, stores all data in the current directory under "__MONGO_DATA__", run it in one terminal then connect in another using `mongo "mongodb://mongo:mongo@localhost:27017/mongo?authSource=admin"`
+alias 'devmongo=docker run -e MONGO_INITDB_ROOT_USERNAME=mongo -e MONGO_INITDB_ROOT_PASSWORD=mongo -v $(pwd)/__MONGO_DATA__:/data/db --network host mongo'
+
+# use GNUplot to plot the last 30 seconds of data, one-number-per-line, updating once per second
+alias 'plot=feedgnuplot --lines --stream --xlen 30'
+
 # user-specific aliases
 alias 'run-hdd-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache --exclude=.transformers --exclude=venv --exclude=vendor "/home/az/Dropbox" "/media/az/Backup"'
 alias 'run-usb-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache --exclude=.transformers --exclude=venv --exclude=vendor "/home/az/Dropbox" "/media/az/BackupUSB"'
-alias 'sync-hyplabs-gdrive=rclone copy --progress hyplabs: ~/Dropbox/Hypotenuse/GDrive --drive-alternate-export'
+alias 'sync-hyplabs-gdrive=rclone copy --progress hyplabs: ~/Dropbox/Hypotenuse/GDrive'
 alias 'notif-listen=while true; do if [ -f .devenv-notify ]; then rm .devenv-notify; notify-send "Completed!" "The long-running operation just completed"; fi; sleep 3; done'  # supports the `notif` command in devenv, which just does `touch .devenv-notify`
 alias 'clip-listen=while true; do if [ -f .devenv-clipboard ]; then cat .devenv-clipboard | xclip -selection c; rm .devenv-clipboard; notify-send "Copied!" "Value was copied to clipboard"; fi; sleep 3; done'  # supports the `notif` command in devenv, which just does `tee $HOME/app/.devenv-clipboard`
 alias 'dl=devenv-lite'

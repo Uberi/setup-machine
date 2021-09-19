@@ -1,6 +1,5 @@
 // Place your settings in this file to overwrite the default settings
 {
-    "editor.minimap.enabled": false,
     "editor.wordWrap": "on",
     "editor.acceptSuggestionOnEnter": "off",
     "editor.acceptSuggestionOnCommitCharacter": false,
@@ -10,6 +9,7 @@
     "editor.renderIndentGuides": true,
     "editor.autoClosingBrackets": "never",
     "editor.autoClosingQuotes": "never",
+    "editor.autoClosingOvertype": "never",
     "explorer.confirmDragAndDrop": false,
     "explorer.confirmDelete": false,
     "window.titleBarStyle": "custom",
@@ -73,14 +73,21 @@
     ],
     "python.linting.pylintEnabled": false,
     "python.pythonPath": "/usr/bin/python3",
+    "python.experiments.enabled": false,
+    "python.showStartPage": false,
+    "python.languageServer": "Pylance",
     "extensions.ignoreRecommendations": true,
     "go.useGoProxyToCheckForToolUpdates": false,
     "go.formatTool": "gofmt",
     "go.autocompleteUnimportedPackages": true,
-    "python.experiments.enabled": false,
-    "python.showStartPage": false,
-    "python.languageServer": "Pylance",
     "settingsSync.keybindingsPerPlatform": false,
     "typescript.disableAutomaticTypeAcquisition": true,
     "python.analysis.typeCheckingMode": "basic",
+    "workbench.editor.untitled.hint": "hidden",
+    "editor.minimap.enabled": false,
+
+    // open folders in restricted mode by default
+    "security.workspace.trust.banner": "never",
+    "security.workspace.trust.startupPrompt": "never",
+    "security.workspace.trust.untrustedFiles": "newWindow",
 }

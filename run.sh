@@ -11,6 +11,6 @@ USERNAME=$(whoami)
 sudo apt-get install ansible
 
 # do software setup with Ansible
-ansible-playbook -i "$SCRIPT_DIR/inventory/local.ini" --ask-become-pass --extra-vars "user_name=$USERNAME real_name='Anthony Zhang' email=me@anthonyz.ca" "$SCRIPT_DIR/main.yml" -v
+ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 --ask-become-pass --extra-vars "user_name=$USERNAME real_name='Anthony Zhang' email=me@anthonyz.ca" "$SCRIPT_DIR/main.yml" -v
 
 echo "PROVISIONING COMPLETE - RESTART MACHINE TO FULLY APPLY CHANGES"

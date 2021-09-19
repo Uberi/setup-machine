@@ -95,6 +95,8 @@
       - catimg                    # command line image viewer (renders images to colored unicode characters)
       - mitmproxy                 # programmable intercepting HTTP proxy
       - cgdb                      # text-mode UI for GDB
+      - sloccount                 # roughly estimate the lines of code in a codebase
+      - feedgnuplot               # command line chart plotting
     become: yes
 
   - name: install VPN stuff
@@ -139,13 +141,14 @@
       - sqlite3
       - sqlitebrowser
       - postgresql-client
-      - redis
+      - redis-tools
+      - mongodb-clients
     become: yes
 
   - name: install VSCode
     block:
       - apt_key: id=BC528686B50D79E339D3721CEB3E94ADBE1229CF url=http://packages.microsoft.com/keys/microsoft.asc
-      - apt_repository: repo='deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main'
+      - apt_repository: repo='deb [arch=amd64,arm64,armhf] http://packages.microsoft.com/repos/code stable main'
       - apt: name=code update_cache=yes
     become: yes
   - name: configure VSCode
@@ -242,12 +245,13 @@
   - name: install FireJail and set it up with the basic profiles
     block:
       - apt: name=firejail
+      - apt: name=firetools
       - shell:
           cmd: firecfg
           creates: /usr/local/bin/firefox
         become: yes
   
-  # UPGRADEABLE: LAST UPDATE 2020-07-12 (check if these profiles are still broken)
+  # UPGRADEABLE: LAST UPDATE 2021-09-18 (check if these profiles are still broken)
   - name: remove Zeal profile for Firejail, because the Zeal profile disallows network access
     file: path=/usr/local/bin/zeal state=absent
     become: yes
@@ -256,6 +260,9 @@
     become: yes
   - name: remove pavucontrol profile for Firejail, because the pavucontrol profile disallows config changes
     file: path=/usr/local/bin/pavucontrol state=absent
+    become: yes
+  - name: remove clementine profile for Firejail, because the clementine profile disallows command line control over playback
+    file: path=/usr/local/bin/clementine state=absent
     become: yes
 
   - name: install and set up Docker
@@ -267,14 +274,14 @@
       - user: name={{ user_name }} groups=docker append=yes
         become: yes
 
-  # UPGRADEABLE: LAST UPDATE 2021-02-28 (upgrade to a new version)
+  # UPGRADEABLE: LAST UPDATE 2021-09-18 (upgrade to a new version)
   - name: install Arduino CLI
     block:
       - get_url:
-          checksum: sha256:b9f14044c2d6c7451bc23b18bfd1323b552a235edbc84e84c9823ad272e63976
-          dest: "/tmp/arduino-cli-linux.tar.xz"
-          url: https://github.com/arduino/arduino-cli/releases/download/0.16.1/arduino-cli_0.16.1_Linux_64bit.tar.gz
-      - unarchive: remote_src=yes dest=/tmp/ src="/tmp/arduino-cli-linux.tar.xz"
+          checksum: sha256:2478a3fdf79748acc4eb1ad42088e59e87adf5f067d27e66bdcb045505d574d5
+          dest: "/tmp/arduino-cli-linux.tar.gz"
+          url: https://github.com/arduino/arduino-cli/releases/download/0.19.0/arduino-cli_0.19.0_Linux_64bit.tar.gz
+      - unarchive: remote_src=yes dest=/tmp/ src="/tmp/arduino-cli-linux.tar.gz"
       - copy: remote_src=yes src=/tmp/arduino-cli dest=~/.local/bin/arduino-cli
       - shell:
           cmd: arduino-cli core install arduino:avr
@@ -301,7 +308,6 @@
       - xfconf: channel=xfwm4 property=/general/cycle_preview value_type=bool value=true
 
       # set Win + Q to open Whisker menu
-      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Primary>Escape" value_type=string value=dummy state=absent
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>q" value_type=string value=xfce4-popup-whiskermenu
 
       # set Win + C to open Qalculate
@@ -321,6 +327,11 @@
 
       # set Win + S to open Clipman
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>s" value_type=string value=xfce4-popup-clipman
+
+      # set Win + F1, Win + F2, Win + F3 to toggle mute, decrease volume, and increase volume
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>F1" value_type=string value="amixer set -D pulse Master 1+ toggle"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>F2" value_type=string value="amixer set Master 5%-"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>F3" value_type=string value="amixer set Master 5%+"
 
       # set Win + F4, Win + F5, Win + F6 to control Clementine
       - xfconf: channel=xfce4-keyboard-shortcuts property="/xfwm4/custom/<Super>F4" value_type=string value="clementine --previous"
@@ -382,15 +393,15 @@
       - { name: "user.email", value: "{{ email }}" }            # user's real name
       - { name: "diff.tool", value: "meld" }                    # diff viewer utility
 
-  # UPGRADEABLE: LAST UPDATE 2021-02-20 (upgrade to a new version)
+  # UPGRADEABLE: LAST UPDATE 2021-09-18 (upgrade to a new version)
   - name: install Delta and configure it as the Git pager
     block:
       - get_url:
-          checksum: sha512:131a13f24625df62be99eecce1ae48c910bc86fd261087bdeb0f8a769b2a9cf22b0f472b3eb6bd0b3f3b4387b16eed2e051b161e84a073bd1619560a913e1af3
+          checksum: sha256:99622098cd23e25c4434eb025444f30e0c74dc1478d981f5a5977dcc450b2676
           dest: "/tmp/delta-linux-gnu.tar.gz"
-          url: https://github.com/dandavison/delta/releases/download/0.6.0/delta-0.6.0-x86_64-unknown-linux-gnu.tar.gz
+          url: https://github.com/dandavison/delta/releases/download/0.8.3/delta-0.8.3-x86_64-unknown-linux-gnu.tar.gz
       - unarchive: remote_src=yes dest=/tmp/ src="/tmp/delta-linux-gnu.tar.gz"
-      - copy: remote_src=yes src=/tmp/delta-0.6.0-x86_64-unknown-linux-gnu/delta dest=~/.local/bin/delta
+      - copy: remote_src=yes src=/tmp/delta-0.8.3-x86_64-unknown-linux-gnu/delta dest=~/.local/bin/delta
       - git_config: name=core.pager scope=global value=delta
 
   - name: disable unnecessary network-facing services such as Avahi/Bonjour and CUPS
@@ -408,10 +419,14 @@
     block:
       - service: name=snapd enabled=no state=stopped
         become: yes
-      - service: name=postgresql enabled=no state=stopped
-        become: yes
-      - service: name=redis-server enabled=no state=stopped
-        become: yes
+
+  - name: set up UFW rules that prevent docker containers from bypassing the firewall
+    blockinfile:
+      path: /etc/ufw/after.rules
+      marker: "# {mark} UFW AND DOCKER"
+      backup: yes
+      block: "{{ lookup('file', './files/ufw-docker-after.rules') }}"
+    become: yes
 
   - name: enable UFW so it runs on boot, the default ruleset denies all incoming traffic and allows all outgoing traffic (check with "sudo ufw status verbose")
     ufw: state=enabled

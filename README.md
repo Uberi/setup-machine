@@ -70,7 +70,8 @@ Manual steps required afterward:
     * [Firefox Multi-Account Containers](https://addons.mozilla.org/en-CA/firefox/addon/multi-account-containers/).
     * [Stylus](https://addons.mozilla.org/en-CA/firefox/addon/styl-us/).
     * [Feedbro](https://addons.mozilla.org/en-US/firefox/addon/feedbroreader/).
-    * [DarkReader](https://addons.mozilla.org/en-US/firefox/addon/darkreader/).
+    * [Dark Reader](https://addons.mozilla.org/en-US/firefox/addon/darkreader/).
+    * [Sidebery](https://addons.mozilla.org/en-US/firefox/addon/sidebery/).
 * Configure Firefox options:
     * `network.IDN_show_punycode` should be true (to avoid IDN homoglyph phishing).
     * `webgl.disabled` should be true (to avoid WebGL attack surface).
@@ -152,7 +153,7 @@ I chose not to install these Dell-specific packages.
 
 These are the hardware-specific tweaks:
 
-* I enabled S3 sleep mode ("deep") instead of S0 ("s2idle") by adding `mem_sleep_default=deep` to `GRUB_CMDLINE_LINUX_DEFAULT` in `/etc/default/grub`, so it became `GRUB_CMDLINE_LINUX_DEFAULT="quiet splash mem_sleep_default=deep"`. This makes battery consumption much lower when suspended (from [this AskUbuntu answer](https://askubuntu.com/questions/1029474/ubuntu-18-04-dell-xps13-9370-no-longer-suspends-on-lid-close)).
+* I enabled S3 sleep mode ("deep") instead of S0 ("s2idle") by adding `mem_sleep_default=deep` to `GRUB_CMDLINE_LINUX_DEFAULT` in `/etc/default/grub`, so it became `GRUB_CMDLINE_LINUX_DEFAULT="quiet splash mem_sleep_default=deep"`. This makes battery consumption much lower when suspended (from [this AskUbuntu answer](https://askubuntu.com/questions/1029474/ubuntu-18-04-dell-xps13-9370-no-longer-suspends-on-lid-close)). To diagnose this, run `cat /sys/power/mem_sleep`, the sleep mode that is currently configured will be surrounded by square brackets.
 * Since there's no hardware mute button, I added a custom shortcut so that Super + Backslash will run this command to toggle mute, and flash the Capslock LED once if unmuting and twice if muting: `sh -c 'if amixer set Capture toggle | grep -q "\[on\]"; then sudo /usr/bin/capslock-led 10 0.1; else sudo /usr/bin/capslock-led 1010 0.1; fi'`. This uses my custom `capslock-led` script; for more details check out the comments in `files/scripts/capslock-led`.
 * Sensors are set up with `sudo sensors-detect`. Afterwards, `sensors` gives the right output. I then installed TLP with `sudo apt-get install tlp tlp-rdw` to get better battery life. This results in the advertised 6 hours of battery life, even with moderately heavy workloads.
 * I followed [these instructions](https://unix.stackexchange.com/questions/189675/is-there-a-way-to-adjusts-the-brightness-of-the-monitor) for changing the brightness of an external monitor using `ddccontrol`:
