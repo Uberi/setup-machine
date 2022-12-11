@@ -19,7 +19,8 @@ Partially inspired by [Stavros Korokithakis' configuration playbook](https://www
 Manual steps required beforehand:
 
 * Disable Intel ME with [me_cleaner](https://github.com/corna/me_cleaner). Make sure to take a firmware backup beforehand.
-* Install 64-bit Xubuntu 20.04. Check out [official docs](https://tutorials.ubuntu.com/tutorial/tutorial-how-to-verify-ubuntu) for verifying the digital signatures.
+* Install 64-bit Xubuntu 22.04. Check out [official docs](https://tutorials.ubuntu.com/tutorial/tutorial-how-to-verify-ubuntu) for verifying the digital signatures.
+* Install VPN client and ensure all traffic is being tunnelled correctly.
 * Add BIOS password and disable booting from external devices.
 * Install a case and privacy screen - here are links for the Dell XPS 9380 Developer Edition:
     * [3M Gold Privacy Screen, 13.3"](https://www.amazon.ca/gp/product/B003V0ZSOE/)
@@ -38,73 +39,47 @@ Automatic steps:
 
 Manual steps required afterward:
 
-* Install fonts by copying them to the user fonts directory with `mkdir -p ~/.fonts; find ~/Files/Fonts -type f -exec cp -t ~/.fonts -i '{}' +; fc-cache -f -v`.
+* Install fonts by copying them to the user fonts directory with `mkdir -p ~/.fonts; find ~/Files/Reference/Fonts -type f -exec cp -t ~/.fonts -i '{}' +; fc-cache -f -v`.
 * Install "Inconsolata-g for Powerline" font and set the terminal font to this one, in order to get Powerline rendering correctly.
 * Import SSH and GPG public keys.
 * Set up Yubikey 4 with GPG keys and touch-to-sign from offline machine.
 * Download docsets for Zeal.
 * Install packages that need out-of-band verification:
-    * Rust toolchain via [rustup](https://www.rustup.rs/).
-    * Google Cloud management via [Google Cloud SDK](https://cloud.google.com/sdk/docs/downloads-apt-get).
-    * AWS management via [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html).
-* Install and set up useful VSCode extensions from verified VSIX files:
-    * `ms-python.python`. Microsoft official.
-    * `ms-azuretools.vscode-docker`. Microsoft official.
-    * `ms-vscode.cpptools`. Microsoft official.
-    * `ms-vscode.vscode-typescript-tslint-plugin`. Microsoft official.
-    * `vsciot-vscode.vscode-arduino`. Microsoft official.
-    * `golang.go`. Google official.
-    * `vscodevim.vim`.
-    * `coenraads.bracket-pair-colorizer-2`.
-    * `alefragnani.bookmarks`.
-    * `adamwalzer.string-converter`.
-    * `oliversturm.fix-json`.
-    * `gregoire.dance`.
+    * [ohmyzsh](https://github.com/ohmyzsh/ohmyzsh) and [zsh-completions](https://github.com/zsh-users/zsh-completions).
 * Restore bookmarks and user settings in Firefox.
-* Install useful Firefox extensions (NOTE: only install addons that are part of the [Recommended Extensions Program](https://support.mozilla.org/en-US/kb/recommended-extensions-program)):
+* Install useful Firefox extensions (NOTE: strongly prefer addons that are part of the [Recommended Extensions Program](https://support.mozilla.org/en-US/kb/recommended-extensions-program)):
     * [uBlock Origin](https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/).
-    * [Privacy Badger](https://addons.mozilla.org/en-US/firefox/addon/privacy-badger17/).
     * [Auto Tab Discard](https://addons.mozilla.org/en-US/firefox/addon/auto-tab-discard/).
     * [SingleFile](https://addons.mozilla.org/en-CA/firefox/addon/single-file/).
     * [Facebook Container](https://addons.mozilla.org/en-CA/firefox/addon/facebook-container/).
     * [Firefox Multi-Account Containers](https://addons.mozilla.org/en-CA/firefox/addon/multi-account-containers/).
-    * [Stylus](https://addons.mozilla.org/en-CA/firefox/addon/styl-us/).
     * [Feedbro](https://addons.mozilla.org/en-US/firefox/addon/feedbroreader/).
-    * [Dark Reader](https://addons.mozilla.org/en-US/firefox/addon/darkreader/).
-    * [Sidebery](https://addons.mozilla.org/en-US/firefox/addon/sidebery/).
+    * [Redirector](https://addons.mozilla.org/en-CA/firefox/addon/redirector/) (this isn't a "Recommended" extension, so make sure to manually download the XPI file and inspect it before installing).
 * Configure Firefox options:
     * `network.IDN_show_punycode` should be true (to avoid IDN homoglyph phishing).
+    * `privacy.resistFingerprinting` should be true (to reduce browser fingerprintability).
+    * `privacy.firstparty.isolate` should be true (to only allow cookies from the website itself).
     * `webgl.disabled` should be true (to avoid WebGL attack surface).
+    * `dom.webaudio.enabled` should be false (to avoid WebAudio attack surface).
+    * `media.peerconnection.enabled` and `media.navigator.enabled` should be false (to avoid WebRTC attack surface).
+    * `javascript.options.baselinejit`, `javascript.options.ion`, `javascript.options.wasm`, `javascript.options.asmjs`, and `javascript.options.native_regexp` should be false (to avoid JIT-compiled JS, WASM, ASM.js, and JIT-compiled-regex attack surface)
+    * `dom.push.enabled` should be false (to fully disable web push notifications).
     * `ui.key.menuAccessKeyFocuses` should be false (to make lone Alt keypresses a no-op, since Diverge 3 keyboard uses a dual-role Enter/Alt key).
     * `browser.sessionstore.warnOnQuit` should be true (to prevent errant Ctrl + Q keypresses from closing the browser).
-    * `app.normandy.enabled` should be false (to disable targeted studies and preference rollouts).
+    * `app.normandy.enabled` and `messaging-system.rsexperimentloader.enabled` should be false (to disable targeted studies and preference rollouts, and to disable feature experiments).
     * `dom.serviceWorkers.enabled` should be false (to disable service workers, which often cause caching issues with shitty sites).
+    * ` network.trr.mode` should be 5 (to use the VPN service's DNS resolver instead of a public DNS-over-HTTPS resolver, see https://wiki.mozilla.org/Trusted_Recursive_Resolver#DNS-over-HTTPS_Prefs_in_Firefox for possible values, usually this setting should be changed via the settings UI).
+    * `security.dialog_enable_delay` should be 500 (usually there's a 1000ms delay before enabling the OK button, but 500ms is enough already to notice).
+    * `network.http.referer.spoofSource` should be true (to avoid leaking referer headers, just send the page's URL itself as the referrer).
 * Set up calendar reminder to run `run-restic-backup` (a custom shell script installed by this project) regularly.
 * Customise XFCE:
     * In Thunar's `Edit` -> `Configure custom actions` dialog, set the `Open Terminal Here` shortcut to have keyboard shortcut F12.
     * Set up mouse/touchpad options for the current hardware.
-* Set up copy of Hypotenuse Labs' Google Drive folder with `rclone config`. The config file, `~/.config/rclone/rclone.conf`, should look like this afterwards:
-
-        [hyplabs]
-        type = drive
-        client_id = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com
-        client_secret = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-        scope = drive.readonly
-        root_folder_id = 12qUgt4vgb6mG7X8wwBjH_EWZ7If4t7P7
-        token = {"access_token":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX","token_type":"Bearer","refresh_token":"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX","expiry":"2020-07-10T05:53:07.468190874-00:00"}
-        team_drive = 
-
-* Set up Geary for email:
-    * Add account with GMail over IMAP, must use an [App Password](https://support.google.com/accounts/answer/185833) (don't use GNOME Online Accounts, it requests too many permissions). Make sure it's configured to download "Everything" from IMAP, rather than the default of "Two Weeks".
-    * Copy the contents of `~/Files/000-configuration/gmail-geary-data-backup` into `~/.local/share/geary/account_01`, to restore mail data backup and keep the mail data in the backed-up folder. This can't be a symlink due to Firejail restrictions.
 * Set up VMs in VirtualBox.
     * Windows VM with Kindle stuff.
     * Whonix VM for Tor stuff.
-* Set up Chromium with [Zoom Redirector](https://github.com/arkadiyt/zoom-redirector), [React Developer Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi?hl=en), and [uBlock Origin](https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm).
-* Set up [broot](https://dystroy.org/broot/install/).
-* Various other useful tools:
-    * FreeCAD: `snap install --beta freecad`
-    * Beekeeper Studio: `snap install beekeeper-studio`
+* Set up Chromium with [uBlock Origin](https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm).
+* Set up [linux-wifi-hotspot](https://github.com/lakinduakash/linux-wifi-hotspot).
 
 Hardware-specific Setup
 -----------------------
@@ -153,19 +128,21 @@ I chose not to install these Dell-specific packages.
 
 These are the hardware-specific tweaks:
 
+* After installation, the OS wouldn't boot, showing instead an "out of memory" error. This is due to https://bugs.launchpad.net/ubuntu/+source/initramfs-tools/+bug/1970402, and the easiest workaround for this was to disable both Secure Boot and Intel SGX in the BIOS settings, as strange as that was.
 * I enabled S3 sleep mode ("deep") instead of S0 ("s2idle") by adding `mem_sleep_default=deep` to `GRUB_CMDLINE_LINUX_DEFAULT` in `/etc/default/grub`, so it became `GRUB_CMDLINE_LINUX_DEFAULT="quiet splash mem_sleep_default=deep"`. This makes battery consumption much lower when suspended (from [this AskUbuntu answer](https://askubuntu.com/questions/1029474/ubuntu-18-04-dell-xps13-9370-no-longer-suspends-on-lid-close)). To diagnose this, run `cat /sys/power/mem_sleep`, the sleep mode that is currently configured will be surrounded by square brackets.
-* Since there's no hardware mute button, I added a custom shortcut so that Super + Backslash will run this command to toggle mute, and flash the Capslock LED once if unmuting and twice if muting: `sh -c 'if amixer set Capture toggle | grep -q "\[on\]"; then sudo /usr/bin/capslock-led 10 0.1; else sudo /usr/bin/capslock-led 1010 0.1; fi'`. This uses my custom `capslock-led` script; for more details check out the comments in `files/scripts/capslock-led`.
-* Sensors are set up with `sudo sensors-detect`. Afterwards, `sensors` gives the right output. I then installed TLP with `sudo apt-get install tlp tlp-rdw` to get better battery life. This results in the advertised 6 hours of battery life, even with moderately heavy workloads.
+* Since there's no hardware mute button, I added a custom shortcut so that Super + Backslash will run this command to toggle mute, and flash the Capslock LED once if unmuting and twice if muting: `sh -c 'if amixer set Capture toggle | grep -q "\[on\]"; then sudo ~/.local/bin/capslock-led 10 0.1; else sudo ~/.local/bin/capslock-led 1010 0.1; fi'`. This uses my custom `capslock-led` script; for more details check out the comments in `files/scripts/capslock-led`.
+* Sensors are set up with `sudo sensors-detect`. Afterwards, `sensors` gives the right output. I then installed TLP with `sudo apt-get install tlp tlp-rdw; systemctl enable tlp.service` to get better battery life. This results in the advertised 6 hours of battery life, even with moderately heavy workloads.
 * I followed [these instructions](https://unix.stackexchange.com/questions/189675/is-there-a-way-to-adjusts-the-brightness-of-the-monitor) for changing the brightness of an external monitor using `ddccontrol`:
     * Install and load userspace I2C kernel module: `sudo apt-get install i2c-tools ddccontrol; sudo modprobe i2c-dev` (the `ddccontrol` package will configure systemd to load the `i2c-dev` kernel module automatically on boot).
-    * Use `sudo i2cdetect -l` to find all I2C devices, there were several lines containing "DDC", which looked like this: `i2c-7	i2c       	DPDDC-B                         	I2C adapter`.
+    * Use `sudo i2cdetect -l` to find all I2C devices, there were several lines containing "DDC", which looked like this: `i2c-7	i2c       	AUX B/DDI B/PHY B               	I2C adapter`.
     * Tried each `i2c-<N>` value like `sudo ddccontrol dev:/dev/i2c-<N>`. The only one that didn't give a `DDC/CI at dev:/dev/i2c-<N> is unusable (-1).` error was `sudo ddccontrol dev:/dev/i2c-7` - so `/dev/i2c-7` was the right I2C interface.
     * In the output of `sudo ddccontrol dev:/dev/i2c-7`, the brightness control was listed as `		> id=brightness, name=Brightness, address=0x10, delay=-1ms, type=0`, so `0x10` is the right I2C address.
     * Tried `sudo ddccontrol dev:/dev/i2c-7 -r 0x10 -w 20`, which set the monitor brightness to 20% of maximum, it worked.
     * Set up a shell alias `alias monitor-brightness='sudo ddccontrol dev:/dev/i2c-7 -r 0x10 -w'` to easily adjust this in the future.
+* I changed `Power Management > Primary Battery Charge Configuration` in the BIOS settings to "Custom", and configured it to start charging at 50% battery and stop charging at 80%, this will dramatically increase battery longevity.
 * I turned off `Video > Dynamic Brightness Control` in the BIOS settings, since it was constantly changing the whole screen's brightness when part of the screen showed something with a different brightness (e.g., editor is dark gray, autocomplete popup is light gray, so everytime autocomplete shows up, the entire screen gets slightly dimmer).
 
 And some hardware-specific workarounds:
 
-* Sometimes the touchpad stops working after sleeping and then resuming. To fix this when it happens, run `sudo rmmod i2c_hid; sudo modprobe i2c_hid` to reload the I2C HID kernel module.
+* Sometimes the touchpad stops working after sleeping and then resuming. When using the Synaptics driver, `synclient TouchpadOff=0` will usually fix it. Otherwise, it's also worth trying `sudo rmmod i2c_hid; sudo modprobe i2c_hid` to reload the I2C HID kernel module.
 * Sometimes upon resuming from sleep, the lock screen fails to show up and the mouse can be moved, but nothing responds. In these cases the lock screen is still present, just not visible - type in your password and press Enter, and it should unlock. It may take a few attempts.

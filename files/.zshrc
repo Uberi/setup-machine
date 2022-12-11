@@ -2,27 +2,20 @@
 # ZSH configuration #
 #####################
 
-# setup oh-my-zsh
-ZSH_THEME=agnoster
-DISABLE_AUTO_UPDATE=true
-
-# setup zgen and use it to install oh-my-zsh and zsh-completions
-source /usr/share/zgen/zgen.zsh
-if ! zgen saved; then
-    zgen oh-my-zsh
-    zgen oh-my-zsh plugins/git
-    zgen oh-my-zsh plugins/sudo
-    zgen oh-my-zsh plugins/wd
-    zgen oh-my-zsh plugins/command-not-found
-    zgen load zsh-users/zsh-completions src
-    zgen save
-fi
+# configure oh-my-zsh
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="robbyrussell"
+HYPHEN_INSENSITIVE="true"  # hyphen-insensitive completion
+zstyle ':omz:update' mode disabled  # disable automatic updates
+DISABLE_UNTRACKED_FILES_DIRTY="true" # disable marking untracked files under VCS as dirty - makes status check for large repositories much faster
+plugins=(sudo wd command-not-found zsh-completions)
+source $ZSH/oh-my-zsh.sh
 
 # setup powerline
 PATH="$HOME/.local/bin:$PATH"
 source /usr/share/powerline/bindings/zsh/powerline.zsh
 
-# setup zsh-syntax-highlighting
+# configure syntax highlighting
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # misc. config options
@@ -55,7 +48,7 @@ alias 'gl=git log --graph --all --decorate --date=local'
 alias 'gp=git push'
 alias 'gph=git push origin HEAD'
 alias 'gpf=git push --force-with-lease origin HEAD'
-alias 'gcl=git clone'
+alias 'gcl=git clone --recurse-submodules -j8'
 alias 'gf=git fetch --all'
 alias 'gu=git pull'
 alias 'gur=git pull --rebase'
@@ -70,7 +63,6 @@ alias 'gdw=git diff'
 alias 'gdcw=git diff --cached'
 alias 'gdt=git difftool --dir-diff --tool=meld --no-prompt'
 alias 'gdtc=git difftool --cached --dir-diff --tool=meld --no-prompt'
-unalias ga gau  # remove aliases that were added by the git plugin in Oh-My-Zsh
 ga () { git add "$@"; git status }
 gau () { git add --update "$@"; git status }
 alias 'gc=git commit'
@@ -91,17 +83,35 @@ alias 'ghl=git stash list'
 alias 'ghist=git log --follow -p --stat --' # show the full history of a file, including renames and diffs for each change
 alias 'groot=cd $(git rev-parse --show-toplevel)'  # go to root level of the current git repo
 alias 'gbranches=git for-each-ref --sort=-authordate --format "%(authordate:iso) %(align:left,25)%(refname:short)%(end) %(subject)" refs/heads'
+alias 'gsubmodules=git submodule update --init --recursive'
 
-# ssh-agent management - use `gssh` in a shell to start a shell-specific SSH-agent, it will get cleaned up automatically when the shell stops
-alias 'gssh=eval "$(ssh-agent -s)"; ssh-add ~/.ssh/id_rsa'
-function cleanup_ssh_agent {
-    # remove ssh-agent instance if present
-    if [ -n "$SSH_AUTH_SOCK" ] ; then
-        eval `/usr/bin/ssh-agent -k`
-        echo 'Cleaning up ssh-agent for this terminal.'
+# for longer-running commands, show a notification when they complete if the terminal's window isn't focused
+function notify-before-command() {
+    declare -g last_command="$1"
+    declare -g start_time
+    declare -g window_id
+    start_time="$(date "+%s")"
+    if [[ -z "$window_id" ]]; then
+        window_id="$(xdotool getwindowfocus)"
     fi
 }
-trap cleanup_ssh_agent EXIT
+function notify-after-command() {
+    local last_status=$?
+    if [[ -z $start_time ]]; then
+        return  # no start time specified for this command
+    fi
+    local time_elapsed="$(( $(date "+%s") - start_time ))"
+    if (( time_elapsed < 3 )); then
+        return  # command executed less than 3 seconds
+    fi
+    if [[ "$(xdotool getwindowfocus)" == "$window_id" ]]; then
+        return  # still focused on the terminal window
+    fi
+    notify-send 'Completed!' "Command '$last_command' exited in $time_elapsed seconds with status $last_status"
+    unset last_command start_time
+}
+add-zsh-hook preexec notify-before-command
+add-zsh-hook precmd notify-after-command
 
 # useful GPG aliases; they aren't necessarily shorter, but they're easier to remember and can be tab completed
 alias 'gpg-import=gpg --keyserver keyserver.ubuntu.com --recv-keys' # `gpg-import KEY_IDENTIFIER`
@@ -131,18 +141,18 @@ alias 'devpostgres=docker run -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=pos
 # development-mode redis, no persistent storage, run it in one terminal then connect in another using `redis-cli -u redis://localhost:6379`
 alias 'devredis=docker run --network host redis'
 
-# development-mode mongo, stores all data in the current directory under "__MONGO_DATA__", run it in one terminal then connect in another using `mongo "mongodb://mongo:mongo@localhost:27017/mongo?authSource=admin"`
-alias 'devmongo=docker run -e MONGO_INITDB_ROOT_USERNAME=mongo -e MONGO_INITDB_ROOT_PASSWORD=mongo -v $(pwd)/__MONGO_DATA__:/data/db --network host mongo'
+# development-mode mongo, stores all data in the current directory under "__MONGO_DATA__", run it in one terminal then connect in another using `mongo "mongodb://localhost:27017/mongo"` (you might need to do "echo 'rs.initiate();' | mongo 'mongodb://localhost:27017/mongo'" to get it initialized)
+alias 'devmongo=docker run -v $(pwd)/__MONGO_DATA__:/data/db --network host -- mongo --replSet rs'
 
 # use GNUplot to plot the last 30 seconds of data, one-number-per-line, updating once per second
 alias 'plot=feedgnuplot --lines --stream --xlen 30'
 
 # user-specific aliases
-alias 'run-hdd-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache --exclude=.transformers --exclude=venv --exclude=vendor "/home/az/Dropbox" "/media/az/Backup"'
-alias 'run-usb-backup=rsync --archive --verbose --human-readable --progress --update --delete --exclude=node_modules --exclude=Dropbox/.vscode --exclude=__pycache__ --exclude=.mypy_cache --exclude=.transformers --exclude=venv --exclude=vendor "/home/az/Dropbox" "/media/az/BackupUSB"'
-alias 'sync-hyplabs-gdrive=rclone copy --progress hyplabs: ~/Dropbox/Hypotenuse/GDrive'
+alias 'run-hdd-backup=rsync --archive --verbose --human-readable --progress --update --delete "/home/az/Dropbox" "/media/az/Backup"'
+alias 'run-ssd-backup=rsync --archive --verbose --human-readable --progress --update --delete "/home/az/Dropbox" "/media/az/backup"'
 alias 'notif-listen=while true; do if [ -f .devenv-notify ]; then rm .devenv-notify; notify-send "Completed!" "The long-running operation just completed"; fi; sleep 3; done'  # supports the `notif` command in devenv, which just does `touch .devenv-notify`
 alias 'clip-listen=while true; do if [ -f .devenv-clipboard ]; then cat .devenv-clipboard | xclip -selection c; rm .devenv-clipboard; notify-send "Copied!" "Value was copied to clipboard"; fi; sleep 3; done'  # supports the `notif` command in devenv, which just does `tee $HOME/app/.devenv-clipboard`
+alias 'd=devenv'
 alias 'dl=devenv-lite'
-
-source /home/az/.config/broot/launcher/bash/br
+alias 'dlr=devenv-resume'
+alias 'dls=devenv-list'

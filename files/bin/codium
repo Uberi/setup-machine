@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# starts VSCodium in this current directory
+# note that VSCodium has been set to use Portable Mode by creating the VSCodium/data/ folder - to upgrade VSCodium, copy that data folder to the new VSCodium program folder
+
+"$(dirname "$0")/VSCodium/codium" "$@"

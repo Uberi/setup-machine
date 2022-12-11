@@ -9,17 +9,23 @@
       - bleachbit                     # computer cleaner
       - blender                       # 3D content creation suite
       - calibre                       # ebook editor, viewer, converter, manager
+      - cheese                        # webcam photo capture
       - chromium-browser              # web browser
       - clementine                    # music player/manager
       - create-resources              # additional resources for GIMP/Blender/Inkscape
+      - cura                          # slicer for 3D printing
+      - cutecom                       # GUI serial terminal
+      - tio                           # CLI serial terminal
       - darktable                     # processor for RAW images
       - dconf-editor                  # settings editor
+      - diffoscope-minimal            # diffs for all sorts of files
       - easytag                       # audio file tag editor
+      - filelight                     # file size inspector
       - filezilla                     # file transfer client
       - firefox                       # web browser
       - fritzing                      # simple circuit designer
       - fritzing-parts                # parts configuration for simple circuit designer
-      - geary                         # email client
+      - geeqie                        # ultra-fast photo manager and organizer
       - gimp                          # image editor
       - gimp-help-en                  # image editor documentation
       - gparted                       # partition editor
@@ -32,15 +38,17 @@
       - libreoffice                   # office suite
       - meld                          # diff viewer/editor
       - meshlab                       # triangular mesh editor and toolkit
+      - musescore3                    # music notation editor
       - pavucontrol                   # Pulseaudio application-level volume control
-      - pdfshuffler                   # PDF page-level manipulation software
-      - qalculate                     # powerful calculator utility
+      - pdfarranger                   # PDF page-level manipulation software
+      - qalculate-gtk                 # powerful calculator utility
       - redshift-gtk                  # screen color temperature changer
+      - remmina                       # remote desktop client (mainly for usage with VNC)
       - simplescreenrecorder          # screen recorder
       - vim-gtk3                      # text editor
       - vlc                           # media player
       - wireshark                     # network traffic analyser
-      - xournal                       # document editor/PDF annotator
+      - xournalpp                     # document editor/PDF annotator
       - zeal                          # offline documentation viewer
     become: yes
 
@@ -52,6 +60,7 @@
       - texlive-latex-recommended # used by pandoc to generate PDFs
       - texlive-latex-extra       # used by pandoc to generate PDFs
       - htop                      # resource monitor, sort of like a better `top`
+      - usb-creator-gtk           # bootable USB creator
       - nethogs                   # process network usage information
       - evemu-tools               # X event toolkit
       - lm-sensors                # computer internal sensor support
@@ -64,8 +73,6 @@
       - gnupg2                    # secure communications toolkit
       - git                       # version control system
       - ansible                   # configuration and deployment system
-      - jekyll                    # static blog-aware website generator
-      - ruby-jekyll-watch         # auto-reload for static blog aware site generator
       - pcregrep                  # grep with PCRE instead of POSIX regular expressions
       - powertop                  # Intel power management utility
       - whois                     # WHOIS directory client
@@ -81,12 +88,12 @@
       - love                      # 2D game engine
       - rclone                    # file synchronization utility for various cloud providers
       - rsync                     # file synchronization utility for synchronization between computers
-      - youtube-dl                # video site downloader
+      - yt-dlp                    # video site downloader
       - libheif-examples          # programs for working with the HEIF image format (now the default output of iPhone cameras)
+      - heif-thumbnailer          # thumbnail generator for HEIF image format
       - sox                       # utilities for working with audio
       - lame                      # MP3 encoder and utilities
       - jupyter-notebook          # Jupyter interactive notebook with Python 3 support
-      - default-jdk               # default Java compiler
       - moreutils                 # useful extra command-line tools
       - w3m                       # text-based web browser
       - expect                    # command line automation
@@ -97,23 +104,16 @@
       - cgdb                      # text-mode UI for GDB
       - sloccount                 # roughly estimate the lines of code in a codebase
       - feedgnuplot               # command line chart plotting
+      - flatpak                   # package management with sandboxing
+      - getmail6                  # mail sync and backup
+      - testdisk                  # file recovery and forensic tools
     become: yes
 
-  - name: install VPN stuff
+  - name: install Java stuff
     apt:
       name:
-        - wireguard                     # VPN client/server
-        - network-manager-openvpn       # OpenVPN support in NetworkManager
-        - network-manager-openvpn-gnome # actual UI for OpenVPN connections in NetworkManager's GUI
-
-  - name: install Yubikey 4 stuff
-    apt:
-      name:
-      - yubikey-personalization-gui
-      - yubioath-desktop
-      - pcscd
-      - scdaemon
-      - pcsc-tools
+      - default-jdk
+      - default-jre
     become: yes
 
   - name: install various C/C++ development tools and libraries
@@ -129,12 +129,6 @@
       - rr              # recording debugger
     become: yes
 
-  - name: install Go development tools
-    apt:
-      name:
-      - golang
-    become: yes
-
   - name: install database tools
     apt:
       name:
@@ -142,19 +136,19 @@
       - sqlitebrowser
       - postgresql-client
       - redis-tools
-      - mongodb-clients
     become: yes
 
-  - name: install VSCode
+  # UPGRADEABLE: LAST UPDATE 2022-12-10 (upgrade to a new version)
+  - name: install VSCodium
     block:
-      - apt_key: id=BC528686B50D79E339D3721CEB3E94ADBE1229CF url=http://packages.microsoft.com/keys/microsoft.asc
-      - apt_repository: repo='deb [arch=amd64,arm64,armhf] http://packages.microsoft.com/repos/code stable main'
-      - apt: name=code update_cache=yes
-    become: yes
-  - name: configure VSCode
-    block:
-      - copy: src=files/settings.json dest=~/.config/Code/User/settings.json follow=yes
-      - copy: src=files/keybindings.json dest=~/.config/Code/User/keybindings.json follow=yes
+      - get_url:
+          checksum: sha256:365db3c4778f71f000578b622829d0694a01aeacc6688881d5a06b1b0bd71883
+          dest: "/tmp/VSCodium-linux-x64.tar.gz"
+          url: https://github.com/VSCodium/vscodium/releases/download/1.74.0.22342/VSCodium-linux-x64-1.74.0.22342.tar.gz
+      - unarchive: remote_src=yes dest=/tmp/VSCodium src="/tmp/VSCodium-linux-x64.tar.gz"
+      - copy: remote_src=yes src=/tmp/VSCodium dest=~/.local/bin/VSCodium
+      - copy: src=files/settings.json dest=~/.local/bin/VSCodium/data/user-data/User/settings.json follow=yes
+      - copy: src=files/keybindings.json dest=~/.local/bin/VSCodium/data/user-data/User/settings.json follow=yes
 
   - name: install Signal for Desktop
     block:
@@ -166,6 +160,7 @@
   - name: install Python development tools and common libraries that are available as packages
     apt:
       name:
+      - python-is-python3
       - python3-all-dev
       - python3-pip
       - python3-wheel
@@ -207,7 +202,6 @@
           - zsh
           - zsh-syntax-highlighting
           - zsh-doc
-          - zgen
           - socat
           - python3-psutil
           - python3-pygit2
@@ -242,6 +236,11 @@
   #    - ardour       # fully-featured DAW
   #  become: yes
 
+  - name: remove buggy software such as Totem Media Player (which crashes on many videos)
+    block:
+      - apt: name=totem
+      - apt: name=totem-common
+
   - name: install FireJail and set it up with the basic profiles
     block:
       - apt: name=firejail
@@ -251,18 +250,12 @@
           creates: /usr/local/bin/firefox
         become: yes
   
-  # UPGRADEABLE: LAST UPDATE 2021-09-18 (check if these profiles are still broken)
+  # UPGRADEABLE: LAST UPDATE 2022-09-27 (check if these profiles are still broken)
   - name: remove Zeal profile for Firejail, because the Zeal profile disallows network access
     file: path=/usr/local/bin/zeal state=absent
     become: yes
-  - name: remove SimpleScreenRecorder profile for Firejail, because the SimpleScreenRecorder profile disallows tray icon registration
-    file: path=/usr/local/bin/simplescreenrecorder state=absent
-    become: yes
-  - name: remove pavucontrol profile for Firejail, because the pavucontrol profile disallows config changes
-    file: path=/usr/local/bin/pavucontrol state=absent
-    become: yes
-  - name: remove clementine profile for Firejail, because the clementine profile disallows command line control over playback
-    file: path=/usr/local/bin/clementine state=absent
+  - name: remove Transmission profile for Firejail, because the Transmission profile has a private-libs bug (see https://github.com/netblue30/firejail/pull/5213)
+    file: path=/usr/local/bin/transmission-gtk state=absent
     become: yes
 
   - name: install and set up Docker
@@ -278,9 +271,9 @@
   - name: install Arduino CLI
     block:
       - get_url:
-          checksum: sha256:2478a3fdf79748acc4eb1ad42088e59e87adf5f067d27e66bdcb045505d574d5
+          checksum: sha256:3fda7631d51d60c669a4c1d6881eda31781c10dca9cb6ffed5b8519d013b529d
           dest: "/tmp/arduino-cli-linux.tar.gz"
-          url: https://github.com/arduino/arduino-cli/releases/download/0.19.0/arduino-cli_0.19.0_Linux_64bit.tar.gz
+          url: https://github.com/arduino/arduino-cli/releases/download/0.27.1/arduino-cli_0.27.1_Linux_64bit.tar.gz
       - unarchive: remote_src=yes dest=/tmp/ src="/tmp/arduino-cli-linux.tar.gz"
       - copy: remote_src=yes src=/tmp/arduino-cli dest=~/.local/bin/arduino-cli
       - shell:
@@ -307,31 +300,31 @@
       # show window previews in Alt + Tab window switcher
       - xfconf: channel=xfwm4 property=/general/cycle_preview value_type=bool value=true
 
-      # set Win + Q to open Whisker menu
-      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>q" value_type=string value=xfce4-popup-whiskermenu
-
       # set Win + C to open Qalculate
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>c" value_type=string value=qalculate
 
-      # set Win + E to open VSCode
-      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>e" value_type=string value=code
+      # set Win + E to open VSCodium
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>e" value_type=string value=codium
 
       # set Win + F to open file manager
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>f" value_type=string value="thunar Dropbox"
 
       # set Win + Shift + F to open file manager as root
-      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>f" value_type=string value="pkexec thunar /home/{{ user_name }}/Dropbox"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>f" value_type=string value="pkexec thunar /home/{{user_name}}/Dropbox"
 
       # set Win + = to suspend the system (sleep mode)
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>equal" value_type=string value="systemctl suspend"
 
       # set Win + S to open Clipman
-      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>s" value_type=string value=xfce4-popup-clipman
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>s" value_type=string value=q
 
       # set Win + F1, Win + F2, Win + F3 to toggle mute, decrease volume, and increase volume
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>F1" value_type=string value="amixer set -D pulse Master 1+ toggle"
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>F2" value_type=string value="amixer set Master 5%-"
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>F3" value_type=string value="amixer set Master 5%+"
+
+      # set Win + Home to the fix-settings script
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Super>Home" value_type=string value="fix-settings"
 
       # set Win + F4, Win + F5, Win + F6 to control Clementine
       - xfconf: channel=xfce4-keyboard-shortcuts property="/xfwm4/custom/<Super>F4" value_type=string value="clementine --previous"
@@ -348,17 +341,13 @@
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>asciicircum" value_type=string value="sh -c 'xdotool keyup 6; xdotool key --clearmodifiers KP_Right'"
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>ampersand" value_type=string value="sh -c 'xdotool keyup 7; xdotool key --clearmodifiers KP_Home'"
       - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>asterisk" value_type=string value="sh -c 'xdotool keyup 8; xdotool key --clearmodifiers KP_Up'"
-      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift><Super>parenleft" value_type=string value="sh -c 'xdotool keyup 9; xdotool key --clearmodifiers KP_Page_Up'"
+      - xfconf: channel=xfce4-keyboard-shortcuts property="/commands/custom/<Shift>e<Super>parenleft" value_type=string value="sh -c 'xdotool keyup 9; xdotool key --clearmodifiers KP_Page_Up'"
 
       # set Win + / to toggle maximize
       - xfconf: channel=xfce4-keyboard-shortcuts property="/xfwm4/custom/<Super>slash" value_type=string value=maximize_window_key
 
       # set Win + F11 to toggle fullscreen
       - xfconf: channel=xfce4-keyboard-shortcuts property="/xfwm4/custom/<Super>F11" value_type=string value=fullscreen_key
-
-      # set laptop lid close to suspend the laptop, both on battery and when plugged in
-      - xfconf: channel=xfce4-power-manager property=/xfce4-power-manager/lid-action-on-battery value_type=int value=1
-      - xfconf: channel=xfce4-power-manager property=/xfce4-power-manager/lid-action-on-ac value_type=int value=1
 
       # don't autoplay any type of optical disks
       - xfconf: channel=thunar-volman property=/autoplay-audio-cds/enabled value_type=bool value=false
@@ -368,12 +357,17 @@
       - xfconf: channel=thunar property=/last-details-view-visible-columns value_type=string value=THUNAR_COLUMN_DATE_MODIFIED,THUNAR_COLUMN_GROUP,THUNAR_COLUMN_NAME,THUNAR_COLUMN_OWNER,THUNAR_COLUMN_PERMISSIONS,THUNAR_COLUMN_SIZE,THUNAR_COLUMN_TYPE
       - xfconf: channel=thunar property=/last-details-view-column-order value_type=string value=THUNAR_COLUMN_NAME,THUNAR_COLUMN_SIZE,THUNAR_COLUMN_SIZE_IN_BYTES,THUNAR_COLUMN_TYPE,THUNAR_COLUMN_DATE_MODIFIED,THUNAR_COLUMN_OWNER,THUNAR_COLUMN_GROUP,THUNAR_COLUMN_PERMISSIONS,THUNAR_COLUMN_DATE_ACCESSED,THUNAR_COLUMN_MIME_TYPE
 
-      # use setxkbmap to swap CapsLock and Escape upon login
-      - copy: src=files/SwapCapsLockAndEscape.desktop dest=~/.config/autostart/SwapCapsLockAndEscape.desktop
+      - xfconf: channel=thunar property=/misc-date-style value_type=string value=THUNAR_DATE_STYLE_SHORT
+
+      # use setxkbmap to map CapsLock to Escape upon login
+      - copy: src=files/CapsLockAsEscape.desktop dest=~/.config/autostart/CapsLockAsEscape.desktop
 
       # load top panel configuration profile (generated by using `xfce4-panel-profiles save xfce-panel-config.tar.bz2`, this saves the current top panel configuration)
       - copy: src=files/xfce-panel-config.tar.bz2 dest=/tmp/xfce-panel-config.tar.bz2
       - shell: xfce4-panel-profiles load /tmp/xfce-panel-config.tar.bz2
+
+  - name: configure GTK settings
+    dconf: key="/org/gtk/settings/file-chooser/startup-mode" value="cwd"
 
   - name: make Redshift autostart on login
     copy: src=files/redshift-gtk.desktop dest=~/.config/autostart/redshift-gtk.desktop
@@ -397,9 +391,9 @@
   - name: install Delta and configure it as the Git pager
     block:
       - get_url:
-          checksum: sha256:99622098cd23e25c4434eb025444f30e0c74dc1478d981f5a5977dcc450b2676
+          checksum: sha256:a24e3994b798aa46b5415481bf6a77ca65c51da70f3a199ce2db279c3e31caee
           dest: "/tmp/delta-linux-gnu.tar.gz"
-          url: https://github.com/dandavison/delta/releases/download/0.8.3/delta-0.8.3-x86_64-unknown-linux-gnu.tar.gz
+          url: https://github.com/dandavison/delta/releases/download/0.14.0/delta-0.14.0-x86_64-unknown-linux-gnu.tar.gz
       - unarchive: remote_src=yes dest=/tmp/ src="/tmp/delta-linux-gnu.tar.gz"
       - copy: remote_src=yes src=/tmp/delta-0.8.3-x86_64-unknown-linux-gnu/delta dest=~/.local/bin/delta
       - git_config: name=core.pager scope=global value=delta

@@ -6,31 +6,26 @@
     "editor.mouseWheelZoom": true,
     "editor.renderWhitespace": "all",
     "editor.renderControlCharacters": false,
-    "editor.renderIndentGuides": true,
     "editor.autoClosingBrackets": "never",
     "editor.autoClosingQuotes": "never",
     "editor.autoClosingOvertype": "never",
+    "editor.minimap.enabled": false,
     "explorer.confirmDragAndDrop": false,
     "explorer.confirmDelete": false,
     "window.titleBarStyle": "custom",
-    "window.zoomLevel": 3,
     "window.newWindowDimensions": "maximized",
     "debug.inlineValues": true,
-    "bracket-pair-colorizer-2.forceIterationColorCycle": true,
-    "bracket-pair-colorizer-2.forceUniqueOpeningColor": true,
-    "bracket-pair-colorizer-2.highlightActiveScope": true,
-    "bracket-pair-colorizer-2.showBracketsInGutter": true,
     "bookmarks.navigateThroughAllFiles": true,
     "bookmarks.saveBookmarksInProject": true,
     "files.hotExit": "onExitAndWindowClose",
-    "editor.find.seedSearchStringFromSelection": false, // don't change the Find query to the current selection
+    "editor.find.seedSearchStringFromSelection": "never", // don't change the Find query to the current selection
+    "editor.bracketPairColorization.enabled": true,
 
     "keyboard.dispatch": "keyCode", // make keyboard shortcuts play nice with keyboard layouts where CapsLock and Esc are swapped (like when it's changed in GNOME Tweak)
 
     // disable all Microsoft online and telemetry functionality
     // note: find out which online services are being used by searching for `@tag:usesOnlineServices` in the settings page
-    "telemetry.enableTelemetry": false,
-    "telemetry.enableCrashReporter": false,
+    "telemetry.telemetryLevel": "off",
     "workbench.enableExperiments": false,
     "workbench.settings.enableNaturalLanguageSearch": false,
     "update.showReleaseNotes": false,
@@ -57,7 +52,6 @@
     "vim.useSystemClipboard": true,
     "vim.startInInsertMode": false,
 
-    "javascript.updateImportsOnFileMove.enabled": "always",
     "files.exclude": {
         "**/__pycache__": true,
         "**/node_modules": true,
@@ -84,10 +78,12 @@
     "typescript.disableAutomaticTypeAcquisition": true,
     "python.analysis.typeCheckingMode": "basic",
     "workbench.editor.untitled.hint": "hidden",
-    "editor.minimap.enabled": false,
 
     // open folders in restricted mode by default
     "security.workspace.trust.banner": "never",
     "security.workspace.trust.startupPrompt": "never",
     "security.workspace.trust.untrustedFiles": "newWindow",
+    "workbench.startupEditor": "none",
+    "window.zoomLevel": 2,
+    "editor.guides.indentation": true,
 }

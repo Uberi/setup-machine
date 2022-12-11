@@ -11,15 +11,18 @@ source ~/SCRIPTS_CONFIG.sh
 export B2_ACCOUNT_ID="$RESTIC_B2_APPLICATION_KEY_ID"
 export B2_ACCOUNT_KEY="$RESTIC_B2_APPLICATION_KEY"
 export RESTIC_REPOSITORY="b2:$RESTIC_B2_BUCKET"
-export RESTIC_PASSWORD="$RESTIC_ENCRYPTION_PASSWORD"
 
 # figure out how many snapshots are redundant (a snapshot is redundant if it's more than a year old, and isn't within the last 10 backups)
 #restic -r "$RESTIC_REPOSITORY" forget --dry-run --keep-last 10 --keep-within 1y
 
-# initialize the repository if it doesn't already exist (if it does exist, then fail)
-restic -r "$RESTIC_REPOSITORY" init || true
-
 # perform backup
-restic -r "$RESTIC_REPOSITORY" backup --verbose=2 "$RESTIC_BACKUP_FOLDER"
+( restic -r "$RESTIC_REPOSITORY" backup --verbose=2 \
+    --exclude="UnderwaterComputer/software" \
+    "$RESTIC_BACKUP_FOLDER" 2>&1 | tee /tmp/run-restic-backup-log.txt ) || true
 
 echo "BACKUP COMPLETE - RUN run-restic-verify TO VERIFY THIS BACKUP"
+
+echo "See /tmp/run-restic-backup-log.txt for logs (this file will be deleted upon exit)"
+read -e -p "Show logs (excluding unchanged files) [y/n]? " choice
+[[ "$choice" == [Yy]* ]] && grep -v '^unchanged ' /tmp/run-restic-backup-log.txt
+rm /tmp/run-restic-backup-log.txt
